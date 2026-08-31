@@ -29,6 +29,10 @@ frontend/   Visor 360° y editor de escenas/hotspots
 docker compose up -d db
 ```
 
+Alternativa sin Docker: una instalación nativa de PostgreSQL 16+ funciona igual,
+siempre que exista un rol/base que coincida con `DATABASE_URL` en `.env`
+(por defecto usuario/clave `tours`, base `tour_studio`).
+
 ### Backend
 
 ```bash
@@ -40,7 +44,8 @@ node prisma/seed.js
 npm run dev
 ```
 
-API disponible en `http://localhost:4000`.
+API disponible en `http://localhost:4000`. `bash scripts/smoke-test.sh` corre un
+smoke test manual de auth/RBAC/tours/escenas/hotspots contra el servidor local.
 
 ### Frontend
 
