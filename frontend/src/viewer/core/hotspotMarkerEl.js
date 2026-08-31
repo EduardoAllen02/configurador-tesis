@@ -3,6 +3,9 @@
 export function buildHotspotMarkerEl(hotspot, onOpen) {
   const wrapper = document.createElement("div");
   wrapper.className = "hs-marker";
+  // El contenedor del CSS2DRenderer tiene pointer-events:none (para que el arrastre de
+  // órbita llegue al canvas 3D) — hay que reactivarlo aquí para que el botón sea clickeable.
+  wrapper.style.pointerEvents = "auto";
 
   const btn = document.createElement("button");
   btn.className = "hs-marker-btn";
