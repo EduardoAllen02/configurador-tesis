@@ -7,6 +7,9 @@ const tours = require("./tours.routes");
 const scenes = require("./scenes.routes");
 const hotspots = require("./hotspots.routes");
 const permissions = require("./permissions.routes");
+const videoUploads = require("./videoUploads.routes");
+const invitations = require("./invitations.routes");
+const exports_ = require("./exports.routes");
 
 const router = Router();
 
@@ -18,5 +21,10 @@ router.use("/tours", tours);
 router.use("/tours/:tourId/scenes", scenes);
 router.use("/tours/:tourId/scenes/:sceneId/hotspots", hotspots);
 router.use("/tours/:tourId/permissions", permissions);
+router.use("/tours/:tourId/video-uploads", videoUploads);
+router.use("/tours/:tourId/invitations", invitations);
+router.use("/tours/:tourId/exports", exports_);
+// Canje de invitación: no cuelga de un tour conocido de antemano (el token lo resuelve).
+router.use("/invitations", invitations.redeemRouter);
 
 module.exports = router;
