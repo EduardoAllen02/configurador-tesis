@@ -30,5 +30,16 @@ export function useSceneEditor(tourId) {
     await reload();
   }
 
-  return { scenes, error, reload, uploadPanorama, removeScene };
+  // Procesa el video síncronamente en el backend (FFmpeg+Sharp) — puede tardar según
+  // duración/frameInterval; el caller debe mostrar un estado de "procesando".
+  async function uploadVideo({ file, frameInterval }) {
+    const form = new FormData();
+    form.append("video", file);
+    if (frameInterval) form.append("frameInterval", String(frameInterval));
+    const result = await api.post(`/api/tours/${tourId}/video-uploads`, form, { isFormData: true });
+    await reload();
+    return result;
+  }
+
+  return { scenes, error, reload, uploadPanorama, uploadVideo, removeScene };
 }
