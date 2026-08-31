@@ -4,6 +4,7 @@
 set -euo pipefail
 
 BASE="${API_URL:-http://localhost:4000}/api"
+RUN_ID=$(date +%s)$RANDOM
 
 echo "== health =="
 curl -sf "$BASE/health"; echo
@@ -18,7 +19,7 @@ curl -sf "$BASE/auth/me" -H "Authorization: Bearer $TOKEN"; echo
 
 echo "== registrar segundo usuario sin permisos =="
 REG2=$(curl -sf -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
-  -d '{"email":"smoke-otro@tourstudio.local","password":"otro1234","fullName":"Otro"}')
+  -d "{\"email\":\"smoke-otro-$RUN_ID@tourstudio.local\",\"password\":\"otro1234\",\"fullName\":\"Otro\"}")
 TOKEN2=$(node -e "console.log(JSON.parse(process.argv[1]).token)" "$REG2")
 
 echo "== GET /tours (usuario seed) =="
@@ -37,5 +38,22 @@ STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/tours")
 
 echo "== GET tour con escenas =="
 curl -sf "$BASE/tours/$TOUR_ID" -H "Authorization: Bearer $TOKEN"; echo
+
+echo "== crear invitación role=viewer y canjearla con un tercer usuario =="
+INV=$(curl -sf -X POST "$BASE/tours/$TOUR_ID/invitations" -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"role":"viewer"}')
+INV_TOKEN=$(node -e "console.log(JSON.parse(process.argv[1]).token)" "$INV")
+
+REG3=$(curl -sf -X POST "$BASE/auth/register" -H "Content-Type: application/json" \
+  -d "{\"email\":\"smoke-invitado-$RUN_ID@tourstudio.local\",\"password\":\"invitado123\",\"fullName\":\"Invitado\"}")
+TOKEN3=$(node -e "console.log(JSON.parse(process.argv[1]).token)" "$REG3")
+
+curl -sf -X POST "$BASE/invitations/$INV_TOKEN/redeem" -H "Authorization: Bearer $TOKEN3"; echo
+
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/tours/$TOUR_ID" -H "Authorization: Bearer $TOKEN3")
+[ "$STATUS" = "200" ] && echo "OK: invitado ahora tiene acceso (200)" || { echo "FALLÓ: esperaba 200, obtuve $STATUS"; exit 1; }
+
+echo "== generar export del tour =="
+curl -sf -X POST "$BASE/tours/$TOUR_ID/exports" -H "Authorization: Bearer $TOKEN"; echo
 
 echo "Smoke test OK"
