@@ -58,8 +58,14 @@ npm run dev
 
 ## Alcance actual
 
-Este repositorio contiene la fundación compartida: modelo de datos, API REST
-con auth/RBAC, y el visor + editor básico de escenas/hotspots. Fuera de este
-alcance por ahora: canje de invitaciones, exportación como bundle web, subida
-de video conectada al pipeline de procesamiento, y cualquier feature de
-personalización avanzada.
+Fundación compartida + MVP: modelo de datos, API REST con auth/RBAC, visor +
+editor de escenas/hotspots, subida de video 360° conectada al pipeline
+FFmpeg+Sharp (crea una escena `video_frame` por frame extraído), compartición
+por enlace (invitaciones con rol predefinido, canjeables por cualquier usuario
+autenticado) y exportación como bundle web estático autocontenido
+(`POST /api/tours/:id/exports`, servido en `/exports/:id/v:n/index.html`,
+publicable en cualquier servidor de archivos estáticos).
+
+Fuera de alcance por ahora: cualquier feature de personalización avanzada
+(theming, pantalla de bienvenida configurable), chatbot/wishlist,
+colaboración en tiempo real, edición asistida por IA.
