@@ -9,11 +9,12 @@ node_modules/
 dist/
 build/
 
-# Uploads (runtime data, not source)
+# Uploads y bundles exportados (runtime data, not source)
 backend/uploads/*
 !backend/uploads/*/
 backend/uploads/*/*
 !backend/uploads/*/.gitkeep
+backend/exports/
 
 # Prisma
 backend/prisma/dev.db
