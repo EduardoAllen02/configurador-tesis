@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../auth/useAuth.js";
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +16,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await register(email, password, fullName);
-      navigate("/tours");
+      navigate(location.state?.from?.pathname ?? "/tours", { replace: true });
     } catch (err) {
       setError(err.message);
     }
