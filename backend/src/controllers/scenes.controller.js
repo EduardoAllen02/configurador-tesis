@@ -40,7 +40,7 @@ const create = asyncHandler(async (req, res) => {
 const uploadPanorama = asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "Falta el archivo panorama" });
 
-  const { name, initialYaw, initialPitch, orderIndex } = req.body;
+  const { name, initialYaw, initialPitch, orderIndex, batchId } = req.body;
 
   const panoramasDir = path.join(uploadsDir, "panoramas");
   await fs.mkdir(panoramasDir, { recursive: true });
@@ -49,15 +49,28 @@ const uploadPanorama = asyncHandler(async (req, res) => {
   const outputPath = path.join(panoramasDir, filename);
   await sharp(req.file.buffer).webp({ quality: 80 }).toFile(outputPath);
 
+  let resolvedOrderIndex = orderIndex ? Number(orderIndex) : undefined;
+  if (resolvedOrderIndex === undefined) {
+    const lastScene = await prisma.scene.findFirst({
+      where: { tourId: req.params.tourId },
+      orderBy: { orderIndex: "desc" },
+    });
+    resolvedOrderIndex = (lastScene?.orderIndex ?? -1) + 1;
+  }
+
   const scene = await prisma.scene.create({
     data: {
       tourId: req.params.tourId,
       name: name || null,
       origen: "panorama_upload",
+      // batchId opcional: lo manda el cliente cuando esta subida forma parte de un lote
+      // arrastrado junto (varios requests individuales, uno por archivo, para poder
+      // mostrar progreso y miniatura por archivo) — ver useSceneEditor.uploadPanoramasBulk.
+      batchId: batchId || null,
       webpPath: `/uploads/panoramas/${filename}`,
       initialYaw: initialYaw ? Number(initialYaw) : 0,
       initialPitch: initialPitch ? Number(initialPitch) : 0,
-      orderIndex: orderIndex ? Number(orderIndex) : 0,
+      orderIndex: resolvedOrderIndex,
     },
   });
   res.status(201).json(scene);
