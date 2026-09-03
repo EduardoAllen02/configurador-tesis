@@ -11,7 +11,7 @@ curl -sf "$BASE/health"; echo
 
 echo "== login usuario seed =="
 LOGIN=$(curl -sf -X POST "$BASE/auth/login" -H "Content-Type: application/json" \
-  -d '{"email":"demo@tourstudio.local","password":"demo1234"}')
+  -d '{"email":"admin@admin.com","password":"admin123"}')
 TOKEN=$(node -e "console.log(JSON.parse(process.argv[1]).token)" "$LOGIN")
 
 echo "== /auth/me =="

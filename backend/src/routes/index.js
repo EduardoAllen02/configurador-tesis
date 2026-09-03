@@ -10,6 +10,7 @@ const permissions = require("./permissions.routes");
 const videoUploads = require("./videoUploads.routes");
 const invitations = require("./invitations.routes");
 const exports_ = require("./exports.routes");
+const menuItems = require("./menuItems.routes");
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use("/tours/:tourId/permissions", permissions);
 router.use("/tours/:tourId/video-uploads", videoUploads);
 router.use("/tours/:tourId/invitations", invitations);
 router.use("/tours/:tourId/exports", exports_);
+router.use("/tours/:tourId/menu-items", menuItems);
 // Canje de invitación: no cuelga de un tour conocido de antemano (el token lo resuelve).
 router.use("/invitations", invitations.redeemRouter);
 

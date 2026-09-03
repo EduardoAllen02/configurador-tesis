@@ -54,8 +54,8 @@ const create = asyncHandler(async (req, res) => {
         data: {
           tourId,
           videoUploadId: videoUpload.id,
+          batchId: videoUpload.id,
           origen: "video_frame",
-          name: `Frame ${i + 1}`,
           webpPath: `/uploads/frames/${videoUpload.id}/${filename}`,
           orderIndex: nextOrderIndex++,
         },

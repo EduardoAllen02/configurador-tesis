@@ -53,6 +53,7 @@ model Tour {
   invitations  Invitation[]
   exports      Export[]
   videoUploads VideoUpload[]
+  menuItems    TourMenuItem[]
 
   @@map("tours")
 }
@@ -138,9 +139,13 @@ enum SceneOrigin {
 model Scene {
   id            String      @id @default(uuid())
   tourId        String
-  videoUploadId String? // solo aplica si origen = video_frame
+  videoUploadId String? // procedencia: de qué VideoUpload vino (solo si origen = video_frame)
+  batchId       String? // agrupación de navegación secuencial (scrubber), agnóstica al origen:
+  // video_frame usa el id del VideoUpload; panorama_upload en lote usa un uuid generado
+  // en esa subida. Dos escenas con el mismo batchId scrubbean juntas, en orden.
   origen        SceneOrigin
-  name          String
+  name          String? // opcional: caption en pantalla + identificador en el editor.
+  // No determina por sí sola la aparición en el menú de navegación (ver TourMenuItem)
   webpPath      String // frame o panorámica, ya optimizado a WebP
   orderIndex    Int         @default(0)
   initialYaw    Float       @default(0)
@@ -148,12 +153,31 @@ model Scene {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  tour        Tour         @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  videoUpload VideoUpload? @relation(fields: [videoUploadId], references: [id])
+  tour        Tour           @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  videoUpload VideoUpload?   @relation(fields: [videoUploadId], references: [id])
   hotspots    Hotspot[]
-  navTargetOf Hotspot[]    @relation("HotspotTarget")
+  navTargetOf Hotspot[]      @relation("HotspotTarget")
+  menuItemsTo TourMenuItem[]
 
   @@map("scenes")
+}
+
+// Menú de navegación curado manualmente — decisión editorial, independiente de `Scene.name`.
+// Un ítem puede apuntar a una escena suelta (ej. "Floor 0") o ser el punto de entrada a
+// todo un grafo de escenas conectadas por hotspot (ej. "Casa Perfetta" → su primera
+// escena; el resto de esa sección se recorre por hotspot, sin listarse aparte).
+model TourMenuItem {
+  id            String   @id @default(uuid())
+  tourId        String
+  label         String
+  targetSceneId String
+  orderIndex    Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  tour        Tour  @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  targetScene Scene @relation(fields: [targetSceneId], references: [id], onDelete: Cascade)
+
+  @@map("tour_menu_items")
 }
 
 // info: título+descripción · price: título+precio+descripción · nav: salta a otra escena
