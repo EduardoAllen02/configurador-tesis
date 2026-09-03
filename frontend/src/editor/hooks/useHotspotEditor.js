@@ -26,10 +26,15 @@ export function useHotspotEditor(tourId, sceneId) {
     await reload();
   }
 
+  async function updateHotspot(hotspotId, data) {
+    await api.patch(`/api/tours/${tourId}/scenes/${sceneId}/hotspots/${hotspotId}`, data);
+    await reload();
+  }
+
   async function removeHotspot(hotspotId) {
     await api.delete(`/api/tours/${tourId}/scenes/${sceneId}/hotspots/${hotspotId}`);
     await reload();
   }
 
-  return { hotspots, error, createHotspot, removeHotspot };
+  return { hotspots, error, createHotspot, updateHotspot, removeHotspot };
 }

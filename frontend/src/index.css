@@ -560,3 +560,305 @@ p {
   border: none;
   margin: 0;
 }
+
+/* ── Editor de escena: lienzo + rail ─────────────────────────────────── */
+.editor-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-4);
+  height: 560px;
+}
+
+.scene-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.scene-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+.scene-tile-active {
+  border-color: var(--accent-solid);
+}
+
+.scene-tile-thumb {
+  width: 52px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--surface-sunken);
+  flex-shrink: 0;
+}
+
+.scene-tile-thumb-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+}
+
+.scene-tile-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.scene-tile-label {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scene-tile-meta {
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+.scene-tile-drag {
+  color: var(--text-faint);
+  cursor: grab;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.scene-tile-remove {
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.scene-tile:hover .scene-tile-remove {
+  opacity: 1;
+}
+
+.scene-tile-uploading {
+  cursor: default;
+}
+
+.scene-tile-progress-ring {
+  position: absolute;
+  inset: 6px;
+  width: 52px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.scene-tile-progress-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--accent-solid);
+  transition: width 0.2s ease;
+}
+
+.scene-tile-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-soft);
+  font-size: 13px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.scene-tile-add:hover {
+  border-color: var(--accent-solid);
+  color: var(--text);
+}
+
+.scene-rail-dropping .scene-tile-add {
+  border-color: var(--accent-solid);
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.editor-viewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #111;
+}
+
+.editor-viewer-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.editor-viewer-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  background: #111;
+}
+
+.editor-viewer-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 15, 0.65);
+  backdrop-filter: blur(6px);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Marcadores sobre la esfera (público y editor) ──────────────────── */
+.hs-marker-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: rgba(23, 23, 21, 0.82);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s ease;
+}
+
+.hs-marker-btn:hover {
+  transform: scale(1.12);
+}
+
+.hs-marker-nav {
+  background: rgba(47, 111, 237, 0.88);
+}
+
+.hs-marker-price {
+  background: rgba(165, 104, 14, 0.88);
+}
+
+/* ── Popover de hotspot (crear/editar) ───────────────────────────────── */
+.hotspot-popover-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.hotspot-popover {
+  position: fixed;
+  z-index: 41;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.hotspot-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hotspot-type-group {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-sunken);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.hotspot-type-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.hotspot-type-btn-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Disclosure (secciones secundarias colapsadas) ───────────────────── */
+.disclosure {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.disclosure-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.disclosure-trigger:hover {
+  color: var(--text);
+}
+
+.disclosure-body {
+  padding: var(--space-4);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}

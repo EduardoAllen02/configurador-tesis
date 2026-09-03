@@ -31,10 +31,39 @@ async function request(path, { method = "GET", body, isFormData = false } = {}) 
   return data;
 }
 
+// fetch() no expone progreso de subida de forma confiable entre navegadores — para la
+// barra de progreso por archivo del subido masivo hace falta XHR, que sí dispara
+// `upload.onprogress`. El resto de la app sigue usando `request()` (fetch) tal cual.
+function uploadWithProgress(path, formData, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}${path}`);
+    const token = getToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress?.(e.loaded / e.total);
+    };
+    xhr.onload = () => {
+      let data = null;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch {
+        /* respuesta vacía o no-JSON */
+      }
+      if (xhr.status >= 200 && xhr.status < 300) resolve(data);
+      else reject(new Error(data?.error || `Error ${xhr.status}`));
+    };
+    xhr.onerror = () => reject(new Error("Fallo de red durante la subida"));
+    xhr.send(formData);
+  });
+}
+
 export const api = {
   get: (path) => request(path),
   post: (path, body, opts) => request(path, { method: "POST", body, ...opts }),
   patch: (path, body) => request(path, { method: "PATCH", body }),
   delete: (path) => request(path, { method: "DELETE" }),
   uploadUrl: (path) => `${API_URL}${path}`,
+  uploadWithProgress,
 };

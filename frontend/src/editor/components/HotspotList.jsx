@@ -7,7 +7,7 @@ export default function HotspotList({ hotspots, onRemove }) {
     return (
       <div className="empty-state" style={{ padding: "var(--space-6)" }}>
         <MapPinIcon width={28} height={28} />
-        <p className="empty-state-body">Sin hotspots todavía. Agrega uno con el formulario de abajo.</p>
+        <p className="empty-state-body">Sin hotspots todavía. Haz clic derecho sobre la panorámica para agregar uno.</p>
       </div>
     );
   }
@@ -18,9 +18,6 @@ export default function HotspotList({ hotspots, onRemove }) {
         <div key={hotspot.id} className="card row" style={{ padding: "10px 14px" }}>
           <span className={`badge ${badgeClass[hotspot.type]}`}>{hotspot.type}</span>
           <span style={{ flex: 1, fontSize: 14 }}>{hotspot.title}</span>
-          <span className="text-faint" style={{ fontSize: 12 }}>
-            lon {hotspot.lon}, lat {hotspot.lat}
-          </span>
           <button
             className="btn btn-ghost btn-icon"
             style={{ width: 28, height: 28 }}

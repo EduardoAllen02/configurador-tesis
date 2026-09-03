@@ -171,6 +171,57 @@ export function XIcon(props) {
   );
 }
 
+export function InfoIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v6" />
+      <circle cx="12" cy="8" r="0.25" fill="currentColor" stroke="currentColor" strokeWidth="2.2" />
+    </svg>
+  );
+}
+
+export function PriceTagIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M11.5 3.5H19a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-.44 1.06l-8 8a1.5 1.5 0 0 1-2.12 0l-7.5-7.5a1.5 1.5 0 0 1 0-2.12l8-8a1.5 1.5 0 0 1 1.06-.44Z" />
+      <circle cx="15.5" cy="8.5" r="1.25" />
+    </svg>
+  );
+}
+
+export function NavArrowIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 12h15" />
+      <path d="M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function DragHandleIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="9" cy="6" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="6" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="12" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="12" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="18" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="18" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function UploadIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 16V4" />
+      <path d="M7 9l5-5 5 5" />
+      <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+    </svg>
+  );
+}
+
 export function SlidersIcon(props) {
   return (
     <svg {...base} {...props}>
