@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { PlusIcon } from "../../components/ui/Icon.jsx";
+import { sceneLabel } from "../utils/sceneLabel.js";
 
 export default function HotspotForm({ scenes, currentSceneId, onCreate }) {
   const [type, setType] = useState("info");
@@ -35,31 +37,63 @@ export default function HotspotForm({ scenes, currentSceneId, onCreate }) {
   const otherScenes = scenes.filter((s) => s.id !== currentSceneId);
 
   return (
-    <form onSubmit={handleSubmit}>
-      <select value={type} onChange={(e) => setType(e.target.value)}>
-        <option value="info">info</option>
-        <option value="price">price</option>
-        <option value="nav">nav</option>
-      </select>
-      <input type="number" placeholder="lon" value={lon} onChange={(e) => setLon(e.target.value)} />
-      <input type="number" placeholder="lat" value={lat} onChange={(e) => setLat(e.target.value)} />
-      <input placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} required />
-      <input placeholder="Descripción" value={description} onChange={(e) => setDescription(e.target.value)} />
+    <form onSubmit={handleSubmit} className="card card-pad stack">
+      <div className="form-row">
+        <div className="field" style={{ maxWidth: 140 }}>
+          <label className="field-label">Tipo</label>
+          <select className="select" value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="info">Info</option>
+            <option value="price">Precio</option>
+            <option value="nav">Navegación</option>
+          </select>
+        </div>
+        <div className="field" style={{ maxWidth: 100 }}>
+          <label className="field-label">Longitud</label>
+          <input className="input" type="number" value={lon} onChange={(e) => setLon(e.target.value)} />
+        </div>
+        <div className="field" style={{ maxWidth: 100 }}>
+          <label className="field-label">Latitud</label>
+          <input className="input" type="number" value={lat} onChange={(e) => setLat(e.target.value)} />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="field-label">Título</label>
+        <input className="input" placeholder="Ej. Cocina remodelada" value={title} onChange={(e) => setTitle(e.target.value)} required />
+      </div>
+
+      <div className="field">
+        <label className="field-label">Descripción (opcional)</label>
+        <input className="input" placeholder="Detalles que verá el visitante" value={description} onChange={(e) => setDescription(e.target.value)} />
+      </div>
+
       {type === "price" && (
-        <input placeholder="Precio" value={price} onChange={(e) => setPrice(e.target.value)} required />
+        <div className="field">
+          <label className="field-label">Precio</label>
+          <input className="input" placeholder="Ej. $2,500,000" value={price} onChange={(e) => setPrice(e.target.value)} required />
+        </div>
       )}
+
       {type === "nav" && (
-        <select value={targetSceneId} onChange={(e) => setTargetSceneId(e.target.value)} required>
-          <option value="">Escena destino…</option>
-          {otherScenes.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+        <div className="field">
+          <label className="field-label">Escena destino</label>
+          <select className="select" value={targetSceneId} onChange={(e) => setTargetSceneId(e.target.value)} required>
+            <option value="">Elige a dónde salta…</option>
+            {otherScenes.map((s) => (
+              <option key={s.id} value={s.id}>
+                {sceneLabel(s, scenes.indexOf(s))}
+              </option>
+            ))}
+          </select>
+        </div>
       )}
-      <button type="submit">Agregar hotspot</button>
-      {error && <p style={{ color: "salmon" }}>{error}</p>}
+
+      {error && <p className="error-text">{error}</p>}
+
+      <button type="submit" className="btn btn-primary" style={{ alignSelf: "flex-start" }}>
+        <PlusIcon width={16} height={16} />
+        Agregar hotspot
+      </button>
     </form>
   );
 }

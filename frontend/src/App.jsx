@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./auth/useAuth.js";
+import { peekLoggingOut, resetLoggingOutFlag } from "./auth/logoutIntent.js";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import ToursListPage from "./pages/ToursListPage.jsx";
@@ -10,8 +12,19 @@ import RedeemInvitationPage from "./pages/RedeemInvitationPage.jsx";
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
+  // Lectura pura — el reset vive en el efecto de abajo, nunca aquí (ver logoutIntent.js).
+  const wasLoggingOut = peekLoggingOut();
+
+  useEffect(() => {
+    if (wasLoggingOut) resetLoggingOutFlag();
+  }, [wasLoggingOut]);
+
   if (loading) return <p>Cargando…</p>;
-  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (!user) {
+    // Un logout explícito no debe "recordar" dónde estabas — solo el caso de llegar
+    // aquí sin sesión (ej. abrir un link de invitación) guarda el origen para volver.
+    return <Navigate to="/login" replace state={wasLoggingOut ? undefined : { from: location }} />;
+  }
   return children;
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
+import { LogoMark } from "../components/ui/Icon.jsx";
 
 // Ruta protegida (requiere sesión iniciada): canjea el token de invitación y redirige
 // al visor del tour. El propio token es la autorización — no requiere admin_tour previo.
@@ -30,11 +31,18 @@ export default function RedeemInvitationPage() {
     };
   }, [token, navigate]);
 
-  if (status === "pending") return <p style={{ margin: "2rem" }}>Canjeando invitación…</p>;
   return (
-    <div style={{ margin: "2rem" }}>
-      <p style={{ color: "salmon" }}>{error}</p>
-      <Link to="/tours">← Volver a mis tours</Link>
+    <div style={{ minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "var(--space-6)" }}>
+      <div className="card card-pad stack" style={{ width: 380, alignItems: "center", textAlign: "center" }}>
+        <LogoMark width={28} height={28} strokeWidth={1.5} />
+        {status === "pending" && <p className="text-soft">Canjeando invitación…</p>}
+        {status === "error" && (
+          <>
+            <p className="error-text">{error}</p>
+            <Link to="/tours" className="btn btn-secondary">Volver a mis tours</Link>
+          </>
+        )}
+      </div>
     </div>
   );
 }
