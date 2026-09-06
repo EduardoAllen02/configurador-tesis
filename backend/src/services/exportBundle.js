@@ -32,7 +32,7 @@ function buildViewerHtml(tourJson) {
     <select id="scene-select"></select>
   </header>
   <div id="scrubber" style="display:none"><input type="range" id="frame-range" min="0" max="0" value="0" /><div id="frame-label"></div></div>
-  <div id="panel"><button onclick="document.getElementById('panel').style.display='none'">×</button><h3 id="panel-title"></h3><p id="panel-desc"></p></div>
+  <div id="panel"><button onclick="document.getElementById('panel').style.display='none'">×</button><h3 id="panel-title"></h3><img id="panel-img" style="display:none;width:100%;border-radius:6px;margin-bottom:.5rem" /><p id="panel-desc"></p></div>
 </div>
 <script type="importmap">
 { "imports": {
@@ -90,7 +90,7 @@ renderer.domElement.addEventListener("pointermove", (e) => {
   if (!prev) return;
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (pointers.size === 1) {
-    lon -= (e.clientX - prev.x) * 0.1;
+    lon += (e.clientX - prev.x) * 0.1;
     lat = Math.max(-85, Math.min(85, lat + (e.clientY - prev.y) * 0.1));
     updateCamera();
   } else if (pointers.size === 2) {
@@ -128,6 +128,7 @@ const rangeEl = document.getElementById("frame-range");
 const frameLabelEl = document.getElementById("frame-label");
 const panelEl = document.getElementById("panel");
 const panelTitleEl = document.getElementById("panel-title");
+const panelImgEl = document.getElementById("panel-img");
 const panelDescEl = document.getElementById("panel-desc");
 
 let markers = [];
@@ -138,6 +139,8 @@ const textureLoader = new THREE.TextureLoader();
 function openHotspot(hotspot) {
   if (hotspot.type === "nav") { select.value = hotspot.targetSceneId; loadScene(hotspot.targetSceneId); return; }
   panelTitleEl.textContent = hotspot.title;
+  if (hotspot.imagePath) { panelImgEl.src = hotspot.imagePath; panelImgEl.style.display = "block"; }
+  else { panelImgEl.style.display = "none"; }
   panelDescEl.textContent = hotspot.type === "price" && hotspot.price ? \`\${hotspot.price} — \${hotspot.description || ""}\` : (hotspot.description || "");
   panelEl.style.display = "block";
 }
@@ -165,7 +168,7 @@ function goToFrame(idx) {
   textureLoader.load(siblingScenes[clamped].webpPath, (tex) => {
     if (seekTarget !== clamped) return;
     tex.colorSpace = THREE.SRGBColorSpace;
-    material.map = tex; material.needsUpdate = true;
+    material.map = tex; material.color.set(0xffffff); material.needsUpdate = true;
   });
 }
 
@@ -206,22 +209,39 @@ animate();
 `;
 }
 
-// Copia los assets (WebP) de las escenas a `outDir/assets` y devuelve el tour con
-// `webpPath` reescrito a rutas relativas dentro del bundle.
+// Copia los assets (WebP) de las escenas y de las imágenes de hotspot a `outDir/assets`,
+// devolviendo el tour con `webpPath`/`imagePath` reescritos a rutas relativas dentro del
+// bundle — el HTML standalone no tiene backend detrás, así que no puede servir /uploads/...
 async function copyAssets(scenes, outDir) {
   const assetsDir = path.join(outDir, "assets");
   await fs.mkdir(assetsDir, { recursive: true });
 
-  const rewritten = [];
-  for (const scene of scenes) {
-    const sourcePath = path.join(uploadsDir, scene.webpPath.replace(/^\/uploads\//, ""));
-    const filename = `${scene.id}${path.extname(scene.webpPath) || ".webp"}`;
+  async function copyOne(sourceRelPath, filename) {
+    const sourcePath = path.join(uploadsDir, sourceRelPath.replace(/^\/uploads\//, ""));
     try {
       await fs.copyFile(sourcePath, path.join(assetsDir, filename));
     } catch {
       // El asset de prueba/seed puede no existir en disco; el bundle igual se genera.
     }
-    rewritten.push({ ...scene, webpPath: `assets/${filename}` });
+    return `assets/${filename}`;
+  }
+
+  const rewritten = [];
+  for (const scene of scenes) {
+    const webpFilename = `${scene.id}${path.extname(scene.webpPath) || ".webp"}`;
+    const webpPath = await copyOne(scene.webpPath, webpFilename);
+
+    const hotspots = [];
+    for (const hotspot of scene.hotspots || []) {
+      if (!hotspot.imagePath) {
+        hotspots.push(hotspot);
+        continue;
+      }
+      const imgFilename = `hotspot-${hotspot.id}${path.extname(hotspot.imagePath) || ".webp"}`;
+      hotspots.push({ ...hotspot, imagePath: await copyOne(hotspot.imagePath, imgFilename) });
+    }
+
+    rewritten.push({ ...scene, webpPath, hotspots });
   }
   return rewritten;
 }
