@@ -50,7 +50,7 @@ export function attachCameraControls({ containerEl, camera, getNadirLat = () => 
     if (pointers.size === 1) {
       const dx = e.clientX - prev.x;
       const dy = e.clientY - prev.y;
-      lon -= dx * 0.1;
+      lon += dx * 0.1;
       lat = clampLat(lat + dy * 0.1);
       updateCamera();
     } else if (pointers.size === 2) {

@@ -56,6 +56,7 @@ export function useTourViewer({
       textureCache.loadTexture(clamped).then((texture) => {
         if (disposed || seekTargetRef.current !== clamped) return;
         sceneApi.sphere.material.map = texture;
+        sceneApi.sphere.material.color.set(0xffffff);
         sceneApi.sphere.material.needsUpdate = true;
         textureCache.preloadGPU(clamped);
       });
