@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { useEditorViewer } from "../hooks/useEditorViewer.js";
 import HotspotTypePopover from "./HotspotTypePopover.jsx";
@@ -7,11 +7,18 @@ import HotspotTypePopover from "./HotspotTypePopover.jsx";
 // hotspot y arrastre para reposicionar uno existente — reemplaza el viejo flujo de
 // "escribe longitud/latitud a ciegas". "popover" trae su propio modo (creando vs.
 // editando uno existente) y su posición de anclaje en pantalla.
-export default function EditorViewer({ scene, hotspots, scenes, onCreateHotspot, onUpdateHotspot, onDeleteHotspot }) {
+//
+// Expone un handle imperativo (focusHotspot/openEditPopover) para que la lista de
+// hotspots de TourEditorPage — que vive fuera de este componente — pueda animar la
+// cámara o abrir el mismo popover de edición sin duplicar ese estado ahí afuera.
+const EditorViewer = forwardRef(function EditorViewer(
+  { scene, hotspots, scenes, onCreateHotspot, onUpdateHotspot, onDeleteHotspot, onNavigateScene },
+  ref
+) {
   const containerRef = useRef(null);
   const [popover, setPopover] = useState(null); // { hotspot?, initial?, anchor }
 
-  const { ready, loadError } = useEditorViewer({
+  const { ready, loadError, focusHotspot } = useEditorViewer({
     containerRef,
     webpPath: scene ? api.uploadUrl(scene.webpPath) : null,
     hotspots,
@@ -26,7 +33,13 @@ export default function EditorViewer({ scene, hotspots, scenes, onCreateHotspot,
     onOpenHotspot: (hotspot, rect) => {
       setPopover({ hotspot, anchor: { x: rect.right, y: rect.top + rect.height / 2 } });
     },
+    onNavigateHotspot: onNavigateScene,
   });
+
+  useImperativeHandle(ref, () => ({
+    focusHotspot,
+    openEditPopover: (hotspot, anchor) => setPopover({ hotspot, anchor }),
+  }));
 
   async function handleSave(data) {
     if (popover.hotspot) {
@@ -70,4 +83,6 @@ export default function EditorViewer({ scene, hotspots, scenes, onCreateHotspot,
       )}
     </div>
   );
-}
+});
+
+export default EditorViewer;

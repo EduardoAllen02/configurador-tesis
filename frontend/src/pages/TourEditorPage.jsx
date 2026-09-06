@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import { useSceneEditor } from "../editor/hooks/useSceneEditor.js";
 import { useHotspotEditor } from "../editor/hooks/useHotspotEditor.js";
@@ -7,12 +7,11 @@ import { useInvitations } from "../editor/hooks/useInvitations.js";
 import { useExports } from "../editor/hooks/useExports.js";
 import AppShell from "../components/ui/AppShell.jsx";
 import Disclosure from "../components/ui/Disclosure.jsx";
-import { UploadIcon, VideoIcon } from "../components/ui/Icon.jsx";
+import { UploadIcon, VideoIcon, EyeIcon } from "../components/ui/Icon.jsx";
 import SceneRail from "../editor/components/SceneRail.jsx";
 import EditorViewer from "../editor/components/EditorViewer.jsx";
 import VideoUploadForm from "../editor/components/VideoUploadForm.jsx";
 import HotspotList from "../editor/components/HotspotList.jsx";
-import HotspotForm from "../editor/components/HotspotForm.jsx";
 import InvitationPanel from "../editor/components/InvitationPanel.jsx";
 import ExportPanel from "../editor/components/ExportPanel.jsx";
 
@@ -29,6 +28,7 @@ export default function TourEditorPage() {
   } = useSceneEditor(tourId);
   const [activeSceneId, setActiveSceneId] = useState(null);
   const [showVideoUpload, setShowVideoUpload] = useState(false);
+  const editorViewerRef = useRef(null);
   const {
     hotspots,
     error: hotspotsError,
@@ -71,6 +71,10 @@ export default function TourEditorPage() {
               : "Arrastra tus panorámicas para empezar a armar el recorrido."}
           </p>
         </div>
+        <Link to={`/tours/${tourId}/view`} className="btn btn-secondary btn-sm">
+          <EyeIcon width={15} height={15} />
+          Vista previa
+        </Link>
       </div>
 
       <section className="section">
@@ -94,12 +98,14 @@ export default function TourEditorPage() {
                 onAddFiles={uploadPanoramasBulk}
               />
               <EditorViewer
+                ref={editorViewerRef}
                 scene={activeScene}
                 hotspots={hotspots}
                 scenes={scenes}
                 onCreateHotspot={createHotspot}
                 onUpdateHotspot={updateHotspot}
                 onDeleteHotspot={removeHotspot}
+                onNavigateScene={setActiveSceneId}
               />
             </div>
             {scenesError && <p className="error-text" style={{ marginTop: "var(--space-3)" }}>{scenesError}</p>}
@@ -108,12 +114,19 @@ export default function TourEditorPage() {
             <div className="stack" style={{ marginTop: "var(--space-4)" }}>
               {hotspots.length > 0 && (
                 <Disclosure title={`Hotspots de esta escena (${hotspots.length})`}>
-                  <HotspotList hotspots={hotspots} onRemove={removeHotspot} />
+                  <HotspotList
+                    hotspots={hotspots}
+                    onRemove={removeHotspot}
+                    onFocus={(lon, lat) => editorViewerRef.current?.focusHotspot(lon, lat)}
+                    onEdit={(hotspot, rect) =>
+                      editorViewerRef.current?.openEditPopover(hotspot, {
+                        x: rect.right,
+                        y: rect.top + rect.height / 2,
+                      })
+                    }
+                  />
                 </Disclosure>
               )}
-              <Disclosure title="Ajuste manual de hotspot (avanzado)">
-                <HotspotForm scenes={scenes} currentSceneId={activeSceneId} onCreate={createHotspot} />
-              </Disclosure>
               <Disclosure title="Video 360°">
                 <VideoUploadForm onUpload={uploadVideo} />
               </Disclosure>

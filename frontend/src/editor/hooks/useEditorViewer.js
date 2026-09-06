@@ -25,17 +25,19 @@ export function useEditorViewer({
   onRequestCreateHotspot,
   onHotspotMoved,
   onOpenHotspot,
+  onNavigateHotspot,
 }) {
   const sceneApiRef = useRef(null);
   const raycasterRef = useRef(null);
   const markersRef = useRef([]);
+  const controlsRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
   // Los callbacks viven en un ref para que la escena (efecto de abajo) no se reconstruya
   // solo porque TourEditorPage pasó una función nueva en el render.
   const callbacksRef = useRef({});
-  callbacksRef.current = { onRequestCreateHotspot, onHotspotMoved, onOpenHotspot };
+  callbacksRef.current = { onRequestCreateHotspot, onHotspotMoved, onOpenHotspot, onNavigateHotspot };
 
   useEffect(() => {
     if (!containerRef.current || !webpPath) return undefined;
@@ -56,6 +58,7 @@ export function useEditorViewer({
       .then((texture) => {
         if (disposed) return;
         sceneApi.sphere.material.map = texture;
+        sceneApi.sphere.material.color.set(0xffffff);
         sceneApi.sphere.material.needsUpdate = true;
         setReady(true);
       })
@@ -68,6 +71,7 @@ export function useEditorViewer({
       camera: sceneApi.camera,
       getNadirLat: () => 85,
     });
+    controlsRef.current = controls;
     controls.animateCameraTo(initialYaw, initialPitch, 0);
 
     function handleContextMenu(e) {
@@ -103,6 +107,7 @@ export function useEditorViewer({
       sceneApi.dispose();
       sceneApiRef.current = null;
       raycasterRef.current = null;
+      controlsRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, webpPath]);
@@ -117,7 +122,10 @@ export function useEditorViewer({
     (hotspots || []).forEach((hotspot) => {
       let obj;
       const el = buildEditableHotspotMarkerEl(hotspot, {
-        onOpen: (hs, btnEl) => callbacksRef.current.onOpenHotspot?.(hs, btnEl.getBoundingClientRect()),
+        onOpen: (hs, btnEl) => {
+          if (hs.type === "nav") callbacksRef.current.onNavigateHotspot?.(hs.targetSceneId);
+          else callbacksRef.current.onOpenHotspot?.(hs, btnEl.getBoundingClientRect());
+        },
         onDragMove: (clientX, clientY) => {
           const rect = containerRef.current?.getBoundingClientRect();
           const lonLat = rect && raycasterRef.current?.pointToLonLat(clientX, clientY, rect);
@@ -136,5 +144,9 @@ export function useEditorViewer({
     });
   }, [hotspots, ready, containerRef]);
 
-  return { ready, loadError };
+  function focusHotspot(lon, lat) {
+    controlsRef.current?.animateCameraTo(lon, lat, 600);
+  }
+
+  return { ready, loadError, focusHotspot };
 }
