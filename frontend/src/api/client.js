@@ -62,7 +62,7 @@ function uploadWithProgress(path, formData, onProgress) {
 export const api = {
   get: (path) => request(path),
   post: (path, body, opts) => request(path, { method: "POST", body, ...opts }),
-  patch: (path, body) => request(path, { method: "PATCH", body }),
+  patch: (path, body, opts) => request(path, { method: "PATCH", body, ...opts }),
   delete: (path) => request(path, { method: "DELETE" }),
   uploadUrl: (path) => `${API_URL}${path}`,
   uploadWithProgress,

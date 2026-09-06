@@ -198,6 +198,7 @@ model Hotspot {
   description   String?
   price         String? // solo aplica si type = price
   targetSceneId String? // solo aplica si type = nav
+  imagePath     String? // opcional, cualquier tipo — mismo patrón que Scene.webpPath
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

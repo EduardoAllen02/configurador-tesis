@@ -1,3 +1,5 @@
+import { api } from "../../api/client";
+
 // Panel único reutilizado (reemplaza el #hotspot-panel global del prototipo original).
 // Para hotspots type=nav, TourViewer nunca llega a abrir este panel: cambia de escena directo.
 export default function HotspotDetailPanel({ hotspot, onClose }) {
@@ -20,6 +22,13 @@ export default function HotspotDetailPanel({ hotspot, onClose }) {
         ×
       </button>
       <h3 style={{ marginTop: 0 }}>{hotspot.title}</h3>
+      {hotspot.imagePath && (
+        <img
+          src={api.uploadUrl(hotspot.imagePath)}
+          alt=""
+          style={{ width: "100%", borderRadius: 6, marginBottom: "0.5rem" }}
+        />
+      )}
       {hotspot.type === "price" && hotspot.price && <p><strong>{hotspot.price}</strong></p>}
       {hotspot.description && <p>{hotspot.description}</p>}
     </div>

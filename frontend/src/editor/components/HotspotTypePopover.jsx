@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { InfoIcon, PriceTagIcon, NavArrowIcon, TrashIcon, XIcon } from "../../components/ui/Icon.jsx";
+import { api } from "../../api/client";
+import { InfoIcon, PriceTagIcon, NavArrowIcon, TrashIcon, XIcon, ImageIcon } from "../../components/ui/Icon.jsx";
 import { sceneLabel } from "../utils/sceneLabel.js";
+import FileDropzone from "../../components/ui/FileDropzone.jsx";
 
 const TYPES = [
   { value: "info", label: "Info", Icon: InfoIcon },
@@ -20,6 +22,8 @@ export default function HotspotTypePopover({ hotspot, anchor, scenes, currentSce
   const [description, setDescription] = useState(hotspot?.description ?? "");
   const [price, setPrice] = useState(hotspot?.price ?? "");
   const [targetSceneId, setTargetSceneId] = useState(hotspot?.targetSceneId ?? "");
+  const [imageFile, setImageFile] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const cardRef = useRef(null);
@@ -64,6 +68,8 @@ export default function HotspotTypePopover({ hotspot, anchor, scenes, currentSce
         description: type !== "nav" ? description.trim() || undefined : undefined,
         price: type === "price" ? price.trim() : undefined,
         targetSceneId: type === "nav" ? targetSceneId : undefined,
+        imageFile: imageFile || undefined,
+        removeImage: removeImage || undefined,
       });
     } catch (err) {
       setError(err.message);
@@ -137,6 +143,36 @@ export default function HotspotTypePopover({ hotspot, anchor, scenes, currentSce
               </option>
             ))}
           </select>
+        )}
+
+        {hotspot?.imagePath && !removeImage && !imageFile ? (
+          <div className="row" style={{ gap: 8 }}>
+            <img
+              src={api.uploadUrl(hotspot.imagePath)}
+              alt=""
+              style={{ width: 44, height: 44, objectFit: "cover", borderRadius: "var(--radius-sm)" }}
+            />
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              style={{ color: "var(--danger)" }}
+              onClick={() => setRemoveImage(true)}
+            >
+              Quitar imagen
+            </button>
+          </div>
+        ) : (
+          <FileDropzone
+            icon={<ImageIcon width={18} height={18} />}
+            title="Imagen (opcional)"
+            description="Se muestra junto al hotspot"
+            accept="image/*"
+            file={imageFile}
+            onSelect={(file) => {
+              setImageFile(file);
+              setRemoveImage(false);
+            }}
+          />
         )}
 
         {error && <p className="error-text" style={{ fontSize: 12.5 }}>{error}</p>}
