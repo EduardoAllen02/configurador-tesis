@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
+import { useAuth } from "../auth/useAuth.js";
 import AppShell from "../components/ui/AppShell.jsx";
 import { EyeIcon, FolderIcon, PencilIcon, PlusIcon, TrashIcon } from "../components/ui/Icon.jsx";
 
 const dateFormatter = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric" });
 
 export default function ToursListPage() {
+  const { user } = useAuth();
+  // Crear tours es exclusivo de Admin/Superadmin (Cliente/Dev reciben acceso a uno ya
+  // existente); borrar un tour es irreversible, exclusivo de Superadmin.
+  const canCreate = user?.globalRole === "admin" || user?.globalRole === "super_admin";
+  const canDelete = user?.globalRole === "super_admin";
   const [tours, setTours] = useState(null);
   const [title, setTitle] = useState("");
   const [creating, setCreating] = useState(false);
@@ -54,7 +60,7 @@ export default function ToursListPage() {
           <h1 className="page-title">Tus tours</h1>
           <p className="page-subtitle">Crea, edita y comparte tus tours virtuales 360°.</p>
         </div>
-        {!creating && (
+        {canCreate && !creating && (
           <button className="btn btn-primary" onClick={() => setCreating(true)}>
             <PlusIcon />
             Crear tour
@@ -99,12 +105,16 @@ export default function ToursListPage() {
             <FolderIcon />
             <p className="empty-state-title">Todavía no tienes tours</p>
             <p className="empty-state-body">
-              Crea el primero para empezar a subir panorámicas o video 360° y armar tu recorrido.
+              {canCreate
+                ? "Crea el primero para empezar a subir panorámicas o video 360° y armar tu recorrido."
+                : "Todavía no te asignaron acceso a ningún tour."}
             </p>
-            <button className="btn btn-primary" onClick={() => setCreating(true)}>
-              <PlusIcon />
-              Crear tour
-            </button>
+            {canCreate && (
+              <button className="btn btn-primary" onClick={() => setCreating(true)}>
+                <PlusIcon />
+                Crear tour
+              </button>
+            )}
           </div>
         </div>
       ) : (
@@ -139,14 +149,16 @@ export default function ToursListPage() {
                     Editar
                   </Link>
                 </div>
-                <button
-                  className="btn btn-ghost btn-icon"
-                  onClick={() => handleDelete(tour)}
-                  title="Eliminar tour"
-                  aria-label="Eliminar tour"
-                >
-                  <TrashIcon width={16} height={16} />
-                </button>
+                {canDelete && (
+                  <button
+                    className="btn btn-ghost btn-icon"
+                    onClick={() => handleDelete(tour)}
+                    title="Eliminar tour"
+                    aria-label="Eliminar tour"
+                  >
+                    <TrashIcon width={16} height={16} />
+                  </button>
+                )}
               </div>
             </div>
           ))}

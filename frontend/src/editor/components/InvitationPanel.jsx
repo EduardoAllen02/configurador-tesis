@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CopyIcon, LinkIcon, TrashIcon } from "../../components/ui/Icon.jsx";
 
 export default function InvitationPanel({ invitations, error, onCreate, onRemove }) {
-  const [role, setRole] = useState("viewer");
+  const [role, setRole] = useState("cliente");
   const [email, setEmail] = useState("");
   const [copiedId, setCopiedId] = useState(null);
 
@@ -25,9 +25,8 @@ export default function InvitationPanel({ invitations, error, onCreate, onRemove
         <div className="field" style={{ maxWidth: 140 }}>
           <label className="field-label">Rol</label>
           <select className="select" value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="viewer">Viewer</option>
-            <option value="editor">Editor</option>
-            <option value="admin_tour">Admin</option>
+            <option value="cliente">Cliente</option>
+            <option value="dev">Dev (código personalizado)</option>
           </select>
         </div>
         <div className="field">

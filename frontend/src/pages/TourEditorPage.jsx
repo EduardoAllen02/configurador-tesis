@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
+import { useAuth } from "../auth/useAuth.js";
 import { useSceneEditor } from "../editor/hooks/useSceneEditor.js";
 import { useHotspotEditor } from "../editor/hooks/useHotspotEditor.js";
 import { useInvitations } from "../editor/hooks/useInvitations.js";
@@ -17,6 +18,8 @@ import ExportPanel from "../editor/components/ExportPanel.jsx";
 
 export default function TourEditorPage() {
   const { tourId } = useParams();
+  const { user } = useAuth();
+  const canManageAccess = user?.globalRole === "admin" || user?.globalRole === "super_admin";
   const [tour, setTour] = useState(null);
   const {
     scenes,
@@ -36,7 +39,10 @@ export default function TourEditorPage() {
     updateHotspot,
     removeHotspot,
   } = useHotspotEditor(tourId, activeSceneId);
-  const { invitations, error: invitationsError, createInvitation, removeInvitation } = useInvitations(tourId);
+  const { invitations, error: invitationsError, createInvitation, removeInvitation } = useInvitations(
+    tourId,
+    canManageAccess
+  );
   const { exports, error: exportsError, exporting, createExport } = useExports(tourId);
 
   useEffect(() => {
@@ -135,17 +141,19 @@ export default function TourEditorPage() {
         )}
       </section>
 
-      <section className="section">
-        <div className="section-header">
-          <span className="section-title">Compartir por enlace</span>
-        </div>
-        <InvitationPanel
-          invitations={invitations}
-          error={invitationsError}
-          onCreate={createInvitation}
-          onRemove={removeInvitation}
-        />
-      </section>
+      {canManageAccess && (
+        <section className="section">
+          <div className="section-header">
+            <span className="section-title">Compartir por enlace</span>
+          </div>
+          <InvitationPanel
+            invitations={invitations}
+            error={invitationsError}
+            onCreate={createInvitation}
+            onRemove={removeInvitation}
+          />
+        </section>
+      )}
 
       <section className="section">
         <div className="section-header">
