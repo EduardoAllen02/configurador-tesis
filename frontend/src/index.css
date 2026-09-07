@@ -758,7 +758,10 @@ p {
   height: 30px;
   border-radius: 50%;
   border: 1.5px solid rgba(255, 255, 255, 0.85);
-  background: rgba(23, 23, 21, 0.82);
+  /* info (default): marca del tour. nav/price se quedan con su color semántico fijo,
+     definido después — no queremos que "ir a otra escena" o "precio" pierdan su
+     significado visual solo porque el tour tiene otro acento de marca. */
+  background: var(--tour-accent, rgba(23, 23, 21, 0.82));
   color: #fff;
   font-size: 13px;
   font-weight: 600;

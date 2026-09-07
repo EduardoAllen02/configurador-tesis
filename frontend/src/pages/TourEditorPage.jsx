@@ -14,6 +14,7 @@ import EditorViewer from "../editor/components/EditorViewer.jsx";
 import VideoUploadForm from "../editor/components/VideoUploadForm.jsx";
 import HotspotList from "../editor/components/HotspotList.jsx";
 import InvitationPanel from "../editor/components/InvitationPanel.jsx";
+import AppearancePanel from "../editor/components/AppearancePanel.jsx";
 import ExportPanel from "../editor/components/ExportPanel.jsx";
 
 export default function TourEditorPage() {
@@ -66,6 +67,11 @@ export default function TourEditorPage() {
     await removeScene(sceneId);
   }
 
+  async function handleSaveAppearance(data) {
+    const updated = await api.patch(`/api/tours/${tourId}`, data);
+    setTour(updated);
+  }
+
   return (
     <AppShell crumbs={[{ label: tour?.title ?? "Cargando…" }]}>
       <div className="page-header">
@@ -112,6 +118,7 @@ export default function TourEditorPage() {
                 onUpdateHotspot={updateHotspot}
                 onDeleteHotspot={removeHotspot}
                 onNavigateScene={setActiveSceneId}
+                theme={tour?.theme}
               />
             </div>
             {scenesError && <p className="error-text" style={{ marginTop: "var(--space-3)" }}>{scenesError}</p>}
@@ -140,6 +147,15 @@ export default function TourEditorPage() {
           </>
         )}
       </section>
+
+      {tour && (
+        <section className="section">
+          <div className="section-header">
+            <span className="section-title">Apariencia</span>
+          </div>
+          <AppearancePanel tour={tour} onSave={handleSaveAppearance} />
+        </section>
+      )}
 
       {canManageAccess && (
         <section className="section">

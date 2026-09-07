@@ -8,10 +8,14 @@ export function buildHotspotMarkerEl(hotspot, onOpen) {
   wrapper.style.pointerEvents = "auto";
 
   const btn = document.createElement("button");
-  btn.className = "hs-marker-btn";
+  // hs-marker-${type} da el color semántico fijo de nav/price (ver index.css) — el mismo
+  // par de clases que ya usa el editor (editableHotspotMarkerEl.js); antes solo tenía
+  // hs-marker-btn, así que nav/price nunca se distinguían por color en el visor público,
+  // solo en el editor. También faltaba el glifo "$" de price.
+  btn.className = `hs-marker-btn hs-marker-${hotspot.type}`;
   btn.type = "button";
   btn.setAttribute("aria-label", hotspot.title);
-  btn.textContent = hotspot.type === "nav" ? "→" : "i";
+  btn.textContent = hotspot.type === "nav" ? "→" : hotspot.type === "price" ? "$" : "i";
 
   btn.addEventListener("click", (e) => {
     e.stopPropagation();

@@ -7,7 +7,12 @@ import HotspotDetailPanel from "./HotspotDetailPanel.jsx";
 // Decide el modo de navegación según el origen de la escena activa:
 //   - panorama_upload: una sola textura fija, sin scrubber, hotspots tipo nav saltan de escena.
 //   - video_frame: secuencia continua de frames hermanos (mismo videoUploadId), con scrubber.
-export default function TourViewer({ scenes, activeSceneId, onSceneChange }) {
+//
+// `theme` (Tour.theme — Track A) se aplica como variables CSS en el contenedor raíz, así
+// cascadea a los marcadores CSS2D (hijos del mismo contenedor) y al scrubber sin necesidad
+// de pasarlo como prop a cada uno — solo HotspotDetailPanel lo recibe directo, porque
+// tooltipStyle cambia colores base (fondo/texto), no solo un acento.
+export default function TourViewer({ scenes, activeSceneId, onSceneChange, theme }) {
   const containerRef = useRef(null);
   const [openHotspot, setOpenHotspot] = useState(null);
 
@@ -44,12 +49,24 @@ export default function TourViewer({ scenes, activeSceneId, onSceneChange }) {
 
   if (!activeScene) return <p>Escena no encontrada.</p>;
 
+  const style = {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    "--tour-accent": theme?.accentColor || "#4da3ff",
+    "--tour-radius": `${theme?.borderRadius ?? 8}px`,
+  };
+
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }} ref={containerRef}>
+    <div style={style} ref={containerRef}>
       {totalFrames > 1 && (
         <TimelineScrubber totalFrames={totalFrames} currentIndex={currentIndex} onSeek={goToFrame} />
       )}
-      <HotspotDetailPanel hotspot={openHotspot} onClose={() => setOpenHotspot(null)} />
+      <HotspotDetailPanel
+        hotspot={openHotspot}
+        onClose={() => setOpenHotspot(null)}
+        tooltipStyle={theme?.tooltipStyle}
+      />
     </div>
   );
 }

@@ -44,7 +44,7 @@ export default function TimelineScrubber({ totalFrames, currentIndex, onSeek }) 
         style={{
           position: "relative",
           height: 6,
-          borderRadius: 3,
+          borderRadius: "var(--tour-radius, 3px)",
           background: "rgba(255,255,255,0.25)",
           marginTop: 12,
           cursor: "pointer",
@@ -57,8 +57,8 @@ export default function TimelineScrubber({ totalFrames, currentIndex, onSeek }) 
             top: 0,
             bottom: 0,
             width: `${pct * 100}%`,
-            background: "#4da3ff",
-            borderRadius: 3,
+            background: "var(--tour-accent, #4da3ff)",
+            borderRadius: "var(--tour-radius, 3px)",
           }}
         />
         <div
@@ -70,7 +70,7 @@ export default function TimelineScrubber({ totalFrames, currentIndex, onSeek }) 
             height: 16,
             marginLeft: -8,
             borderRadius: "50%",
-            background: "#4da3ff",
+            background: "var(--tour-accent, #4da3ff)",
           }}
         />
       </div>

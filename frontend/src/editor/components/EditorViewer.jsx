@@ -12,7 +12,7 @@ import HotspotTypePopover from "./HotspotTypePopover.jsx";
 // hotspots de TourEditorPage — que vive fuera de este componente — pueda animar la
 // cámara o abrir el mismo popover de edición sin duplicar ese estado ahí afuera.
 const EditorViewer = forwardRef(function EditorViewer(
-  { scene, hotspots, scenes, onCreateHotspot, onUpdateHotspot, onDeleteHotspot, onNavigateScene },
+  { scene, hotspots, scenes, onCreateHotspot, onUpdateHotspot, onDeleteHotspot, onNavigateScene, theme },
   ref
 ) {
   const containerRef = useRef(null);
@@ -55,8 +55,13 @@ const EditorViewer = forwardRef(function EditorViewer(
     setPopover(null);
   }
 
+  const style = {
+    "--tour-accent": theme?.accentColor || "#4da3ff",
+    "--tour-radius": `${theme?.borderRadius ?? 8}px`,
+  };
+
   return (
-    <div className="editor-viewer">
+    <div className="editor-viewer" style={style}>
       <div ref={containerRef} className="editor-viewer-canvas" />
       {loadError && (
         <div className="editor-viewer-loading">No pudimos cargar esta panorámica. Prueba subiéndola de nuevo.</div>

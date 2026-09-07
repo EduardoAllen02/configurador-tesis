@@ -63,6 +63,9 @@ export default function TourViewerPage() {
               <span className="text-faint" style={{ fontSize: 13 }}>
                 {scenes.findIndex((s) => s.id === activeSceneId) + 1} / {scenes.length}
               </span>
+              {tour.customTexts?.welcomeMessage && (
+                <span className="text-soft" style={{ fontSize: 13 }}>· {tour.customTexts.welcomeMessage}</span>
+              )}
               <span style={{ flex: 1 }} />
               <Link to={`/tours/${tourId}/edit`} className="btn btn-secondary btn-sm">
                 <PencilIcon width={15} height={15} />
@@ -71,7 +74,12 @@ export default function TourViewerPage() {
             </div>
             <div style={{ flex: 1, position: "relative", background: "#111" }}>
               {activeSceneId && (
-                <TourViewer scenes={scenes} activeSceneId={activeSceneId} onSceneChange={setActiveSceneId} />
+                <TourViewer
+                  scenes={scenes}
+                  activeSceneId={activeSceneId}
+                  onSceneChange={setActiveSceneId}
+                  theme={tour.theme}
+                />
               )}
             </div>
           </>
