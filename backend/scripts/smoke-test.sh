@@ -39,9 +39,9 @@ STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/tours")
 echo "== GET tour con escenas =="
 curl -sf "$BASE/tours/$TOUR_ID" -H "Authorization: Bearer $TOKEN"; echo
 
-echo "== crear invitación role=viewer y canjearla con un tercer usuario =="
+echo "== crear invitación role=cliente y canjearla con un tercer usuario =="
 INV=$(curl -sf -X POST "$BASE/tours/$TOUR_ID/invitations" -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" -d '{"role":"viewer"}')
+  -H "Content-Type: application/json" -d '{"role":"cliente"}')
 INV_TOKEN=$(node -e "console.log(JSON.parse(process.argv[1]).token)" "$INV")
 
 REG3=$(curl -sf -X POST "$BASE/auth/register" -H "Content-Type: application/json" \

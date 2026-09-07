@@ -15,18 +15,17 @@ async function main() {
       email: "admin@admin.com",
       passwordHash,
       fullName: "Admin",
-      isSuperAdmin: true,
+      globalRole: "super_admin",
     },
   });
 
+  // Sin TourPermission para el seed user: es super_admin, así que ya tiene acceso a
+  // cualquier tour sin necesitar una fila de permiso puntual (ver rbac.js).
   const tour = await prisma.tour.create({
     data: {
       title: "Tour de demostración",
       description: "Tour de prueba con una escena de panorámica y una de secuencia de video.",
       createdById: user.id,
-      permissions: {
-        create: { userId: user.id, role: "admin_tour" },
-      },
     },
   });
 

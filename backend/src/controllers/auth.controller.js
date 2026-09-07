@@ -17,7 +17,10 @@ const register = asyncHandler(async (req, res) => {
   });
 
   const token = signToken(user);
-  res.status(201).json({ token, user: { id: user.id, email: user.email, fullName: user.fullName } });
+  res.status(201).json({
+    token,
+    user: { id: user.id, email: user.email, fullName: user.fullName, globalRole: user.globalRole },
+  });
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -28,13 +31,16 @@ const login = asyncHandler(async (req, res) => {
   }
 
   const token = signToken(user);
-  res.json({ token, user: { id: user.id, email: user.email, fullName: user.fullName } });
+  res.json({
+    token,
+    user: { id: user.id, email: user.email, fullName: user.fullName, globalRole: user.globalRole },
+  });
 });
 
 const me = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-  res.json({ id: user.id, email: user.email, fullName: user.fullName, isSuperAdmin: user.isSuperAdmin });
+  res.json({ id: user.id, email: user.email, fullName: user.fullName, globalRole: user.globalRole });
 });
 
 module.exports = { register, login, me };

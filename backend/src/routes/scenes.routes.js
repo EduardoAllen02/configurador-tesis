@@ -2,7 +2,7 @@ const { Router } = require("express");
 const multer = require("multer");
 const path = require("path");
 const { requireAuth } = require("../middleware/auth");
-const { requireTourRole } = require("../middleware/rbac");
+const { requireTourAccess } = require("../middleware/rbac");
 const { uploadsDir } = require("../config/env");
 const {
   list,
@@ -31,18 +31,18 @@ const router = Router({ mergeParams: true });
 
 router.use(requireAuth);
 
-router.get("/", requireTourRole("viewer"), list);
-router.post("/", requireTourRole("editor"), create);
-router.post("/upload-panorama", requireTourRole("editor"), upload.single("panorama"), uploadPanorama);
+router.get("/", requireTourAccess(), list);
+router.post("/", requireTourAccess(), create);
+router.post("/upload-panorama", requireTourAccess(), upload.single("panorama"), uploadPanorama);
 router.post(
   "/bulk-upload-panoramas",
-  requireTourRole("editor"),
+  requireTourAccess(),
   uploadBulk.array("panoramas", 20),
   bulkUploadPanoramas
 );
-router.patch("/reorder", requireTourRole("editor"), reorder);
-router.get("/:sceneId", requireTourRole("viewer"), getOne);
-router.patch("/:sceneId", requireTourRole("editor"), update);
-router.delete("/:sceneId", requireTourRole("editor"), remove);
+router.patch("/reorder", requireTourAccess(), reorder);
+router.get("/:sceneId", requireTourAccess(), getOne);
+router.patch("/:sceneId", requireTourAccess(), update);
+router.delete("/:sceneId", requireTourAccess(), remove);
 
 module.exports = router;

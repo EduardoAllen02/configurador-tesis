@@ -1,8 +1,12 @@
 // Esquema de base de datos — Sistema de configuración de tours virtuales 360°.
 // Sistema de una sola empresa (sin organizaciones/multi-tenant): los tours pertenecen
-// directo al sistema. RBAC de un solo nivel: rol global de usuario (super_admin / miembro,
-// vía User.isSuperAdmin) + rol granular por tour (admin_tour / editor / viewer) vía
-// TourPermission.
+// directo al sistema. RBAC de dos niveles (Fase 2.0):
+//   - Rol global (User.globalRole): super_admin | admin | member. Superadmin y Admin
+//     operan sobre cualquier tour sin necesitar TourPermission; solo Superadmin puede
+//     escalar roles de otros usuarios o borrar de forma irreversible (tours, cuentas).
+//   - Rol por tour (TourPermission.role): cliente | dev, para el usuario final dueño de
+//     un tour puntual. Ambos ven y editan igual (escenas, hotspots, apariencia); dev
+//     además puede agregar código personalizado (Tour.customCss/customJs).
 //
 // Las escenas soportan dos orígenes de navegación (campo `origen`):
 //   - video_frame: frame extraído de un video 360° subido (ver VideoUpload + FFmpeg/Sharp)
@@ -20,14 +24,20 @@ datasource db {
 
 // ── Usuarios ──────────────────────────────────────────────────────────────
 
+enum GlobalRole {
+  super_admin
+  admin
+  member
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String     @id @default(uuid())
+  email        String     @unique
   passwordHash String
   fullName     String
-  isSuperAdmin Boolean  @default(false) // super_admin: acceso total, ignora TourPermission
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  globalRole   GlobalRole @default(member)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   tourPermissions TourPermission[]
   invitationsSent Invitation[]     @relation("InvitationCreatedBy")
@@ -44,6 +54,11 @@ model Tour {
   title       String
   description String?
   createdById String
+  customCss   String? // libre, sin sandbox — gate: requireDevAccess (ver rbac.js)
+  customJs    String? // libre, sin sandbox — gate: requireDevAccess (ver rbac.js)
+  theme       Json? // { accentColor, borderRadius, tooltipStyle } — Track A
+  customTexts Json? // { welcomeMessage, ctaLabel, ... } — Track A
+  chatbotPrompt String? // persona del asistente por tour — Track B
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -58,11 +73,12 @@ model Tour {
   @@map("tours")
 }
 
-// Jerarquía: admin_tour > editor > viewer (ver middleware/rbac.js -> requireTourRole).
+// cliente y dev ven y editan igual (escenas, hotspots, apariencia); dev además puede
+// tocar Tour.customCss/customJs (ver rbac.js -> requireDevAccess). Sin tier de solo
+// lectura: a diferencia del RBAC de Fase 0, aquí no existe un "viewer" por tour.
 enum TourRole {
-  admin_tour
-  editor
-  viewer
+  cliente
+  dev
 }
 
 model TourPermission {
