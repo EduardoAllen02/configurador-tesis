@@ -7,6 +7,13 @@ const prisma = require("../config/prisma");
 const { uploadsDir } = require("../config/env");
 
 function buildViewerHtml(tourJson) {
+  const accent = tourJson.theme?.accentColor || "#4da3ff";
+  const radius = tourJson.theme?.borderRadius ?? 8;
+  const isLight = tourJson.theme?.tooltipStyle === "light";
+  const panelBg = isLight ? "rgba(255,255,255,.96)" : "rgba(20,20,20,.92)";
+  const panelColor = isLight ? "#1a1a18" : "#eee";
+  const welcomeMessage = tourJson.customTexts?.welcomeMessage;
+
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -14,21 +21,26 @@ function buildViewerHtml(tourJson) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${tourJson.title.replace(/</g, "&lt;")}</title>
 <style>
+  :root{--tour-accent:${accent};--tour-radius:${radius}px}
   html,body{margin:0;height:100%;background:#111;color:#eee;font-family:system-ui,sans-serif;overflow:hidden}
   #app{position:relative;width:100vw;height:100vh}
-  header{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:rgba(0,0,0,.5)}
+  header{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:rgba(0,0,0,.5);gap:.75rem}
+  #welcome{font-size:.85rem;opacity:.8;flex:1}
   select{font-size:1rem}
-  .hs-marker-btn{width:28px;height:28px;border-radius:50%;border:none;background:#eee;color:#111;font-weight:bold;cursor:pointer;pointer-events:auto}
+  .hs-marker-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--tour-accent);color:#fff;font-weight:bold;cursor:pointer;pointer-events:auto}
   #scrubber{position:absolute;left:16px;right:16px;bottom:16px;z-index:2}
   #scrubber input{width:100%}
-  #panel{position:absolute;right:16px;top:56px;width:260px;background:rgba(20,20,20,.92);border-radius:8px;padding:1rem;z-index:2;display:none}
-  #panel button{float:right}
+  #scrubber input{accent-color:var(--tour-accent)}
+  #panel{position:absolute;right:16px;top:56px;width:260px;background:${panelBg};color:${panelColor};border-radius:var(--tour-radius);border-left:4px solid var(--tour-accent);padding:1rem;z-index:2;display:none}
+  #panel button{float:right;color:inherit;background:none;border:none;cursor:pointer}
+  #panel strong{color:var(--tour-accent)}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <strong>${tourJson.title.replace(/</g, "&lt;")}</strong>
+    ${welcomeMessage ? `<span id="welcome">${welcomeMessage.replace(/</g, "&lt;")}</span>` : ""}
     <select id="scene-select"></select>
   </header>
   <div id="scrubber" style="display:none"><input type="range" id="frame-range" min="0" max="0" value="0" /><div id="frame-label"></div></div>
@@ -141,7 +153,17 @@ function openHotspot(hotspot) {
   panelTitleEl.textContent = hotspot.title;
   if (hotspot.imagePath) { panelImgEl.src = hotspot.imagePath; panelImgEl.style.display = "block"; }
   else { panelImgEl.style.display = "none"; }
-  panelDescEl.textContent = hotspot.type === "price" && hotspot.price ? \`\${hotspot.price} — \${hotspot.description || ""}\` : (hotspot.description || "");
+  // DOM en vez de innerHTML/template: title/price/description son texto editable por
+  // cliente/dev, no confiable como HTML — construir nodos evita inyección.
+  panelDescEl.textContent = "";
+  if (hotspot.type === "price" && hotspot.price) {
+    const priceEl = document.createElement("strong");
+    priceEl.textContent = hotspot.price;
+    panelDescEl.appendChild(priceEl);
+    if (hotspot.description) panelDescEl.appendChild(document.createTextNode(" — " + hotspot.description));
+  } else if (hotspot.description) {
+    panelDescEl.textContent = hotspot.description;
+  }
   panelEl.style.display = "block";
 }
 
@@ -256,7 +278,12 @@ async function generateBundle({ tourId, outDir }) {
   await fs.mkdir(outDir, { recursive: true });
   const scenesWithLocalAssets = await copyAssets(tour.scenes, outDir);
 
-  const html = buildViewerHtml({ title: tour.title, scenes: scenesWithLocalAssets });
+  const html = buildViewerHtml({
+    title: tour.title,
+    scenes: scenesWithLocalAssets,
+    theme: tour.theme,
+    customTexts: tour.customTexts,
+  });
   await fs.writeFile(path.join(outDir, "index.html"), html, "utf-8");
 }
 

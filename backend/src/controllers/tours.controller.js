@@ -36,10 +36,13 @@ const getOne = asyncHandler(async (req, res) => {
 });
 
 const update = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
+  // theme/customTexts son parte de "apariencia" (Track A) — cualquiera con acceso al
+  // tour (cliente/dev/admin/superadmin) puede tocarlos, a diferencia de customCss/customJs
+  // (código, gate: requireDevAccess en tours.routes.js -> updateCustomCode).
+  const { title, description, theme, customTexts } = req.body;
   const tour = await prisma.tour.update({
     where: { id: req.params.tourId },
-    data: { title, description },
+    data: { title, description, theme, customTexts },
   });
   res.json(tour);
 });
