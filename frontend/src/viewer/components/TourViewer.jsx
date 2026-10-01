@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { useTourViewer } from "../hooks/useTourViewer.js";
 import TimelineScrubber from "./TimelineScrubber.jsx";
@@ -12,7 +12,7 @@ import HotspotDetailPanel from "./HotspotDetailPanel.jsx";
 // cascadea a los marcadores CSS2D (hijos del mismo contenedor) y al scrubber sin necesidad
 // de pasarlo como prop a cada uno — solo HotspotDetailPanel lo recibe directo, porque
 // tooltipStyle cambia colores base (fondo/texto), no solo un acento.
-export default function TourViewer({ scenes, activeSceneId, onSceneChange, theme }) {
+export default function TourViewer({ scenes, activeSceneId, onSceneChange, onFrameChange, theme }) {
   const containerRef = useRef(null);
   const [openHotspot, setOpenHotspot] = useState(null);
 
@@ -46,6 +46,11 @@ export default function TourViewer({ scenes, activeSceneId, onSceneChange, theme
     initialPitch: activeScene?.initialPitch,
     onHotspotOpen: handleHotspotOpen,
   });
+
+  // El scrubber mueve el frame sin cambiar la escena activa: se avisa para que el encabezado no quede desfasado.
+  useEffect(() => {
+    onFrameChange?.(currentIndex, totalFrames);
+  }, [currentIndex, totalFrames, onFrameChange]);
 
   if (!activeScene) return <p>Escena no encontrada.</p>;
 

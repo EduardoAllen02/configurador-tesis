@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import TourViewer from "../viewer/components/TourViewer.jsx";
@@ -14,6 +14,11 @@ export default function TourViewerPage() {
   const [scenes, setScenes] = useState([]);
   const [activeSceneId, setActiveSceneId] = useState(null);
   const [error, setError] = useState(null);
+  const [frame, setFrame] = useState({ index: 0, total: 0 });
+  const handleFrameChange = useCallback(
+    (index, total) => setFrame((prev) => (prev.index === index && prev.total === total ? prev : { index, total })),
+    []
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +66,7 @@ export default function TourViewerPage() {
                 ))}
               </select>
               <span className="text-faint" style={{ fontSize: 13 }}>
-                {scenes.findIndex((s) => s.id === activeSceneId) + 1} / {scenes.length}
+                {frame.total > 1 ? `${frame.index + 1} / ${frame.total}` : `${scenes.findIndex((s) => s.id === activeSceneId) + 1} / ${scenes.length}`}
               </span>
               {tour.customTexts?.welcomeMessage && (
                 <span className="text-soft" style={{ fontSize: 13 }}>· {tour.customTexts.welcomeMessage}</span>
@@ -78,6 +83,7 @@ export default function TourViewerPage() {
                   scenes={scenes}
                   activeSceneId={activeSceneId}
                   onSceneChange={setActiveSceneId}
+                  onFrameChange={handleFrameChange}
                   theme={tour.theme}
                 />
               )}
