@@ -22,6 +22,7 @@ export default function HotspotDetailPanel({ hotspot, onClose, tooltipStyle }) {
         borderRadius: "var(--tour-radius, 8px)",
         borderLeft: "4px solid var(--tour-accent, #4da3ff)",
         padding: "1rem",
+        zIndex: 2,
       }}
     >
       <button

@@ -33,7 +33,7 @@ export default function TimelineScrubber({ totalFrames, currentIndex, onSeek }) 
 
   return (
     <div
-      style={{ position: "absolute", left: 16, right: 16, bottom: 16, height: 32 }}
+      style={{ position: "absolute", left: 16, right: 16, bottom: 16, height: 32, zIndex: 2 }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}

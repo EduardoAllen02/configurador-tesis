@@ -38,6 +38,8 @@ export function attachCameraControls({ containerEl, camera, getNadirLat = () => 
   }
 
   function onPointerDown(e) {
+    // Un botón (marcador de hotspot) debe recibir su click: capturar el puntero aquí lo desviaría al contenedor.
+    if (e.target.closest?.("button")) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     containerEl.setPointerCapture(e.pointerId);
   }
