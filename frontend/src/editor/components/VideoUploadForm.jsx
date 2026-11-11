@@ -35,7 +35,7 @@ export default function VideoUploadForm({ onUpload }) {
         <VideoIcon width={18} height={18} className="text-soft" />
         Video 360°
       </div>
-      <p className="text-soft" style={{ fontSize: 13, marginTop: -8 }}>
+      <p className="text-soft" style={{ fontSize: 14, lineHeight: 1.5 }}>
         Sube un recorrido en video. Se procesa automáticamente: extraemos frames y cada uno
         se vuelve una escena navegable en secuencia, como avanzar por el recorrido.
       </p>
@@ -64,7 +64,7 @@ export default function VideoUploadForm({ onUpload }) {
         <span className="helper-text">Se guarda 1 de cada {frameInterval || "N"} frames — más alto es más rápido de procesar, más bajo es más fluido.</span>
       </div>
 
-      {result && <p style={{ fontSize: 13, color: "var(--success)" }}>{result}</p>}
+      {result && <p style={{ fontSize: 14, color: "var(--success)" }}>{result}</p>}
       {error && <p className="error-text">{error}</p>}
 
       <button type="submit" className="btn btn-primary" disabled={processing}>

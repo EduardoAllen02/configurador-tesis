@@ -4,14 +4,18 @@
 //   - Rol global (User.globalRole): super_admin | admin | member. Superadmin y Admin
 //     operan sobre cualquier tour sin necesitar TourPermission; solo Superadmin puede
 //     escalar roles de otros usuarios o borrar de forma irreversible (tours, cuentas).
-//   - Rol por tour (TourPermission.role): cliente | dev, para el usuario final dueño de
-//     un tour puntual. Ambos ven y editan igual (escenas, hotspots, apariencia); dev
-//     además puede agregar código personalizado (Tour.customCss/customJs).
+//   - Rol por tour (TourPermission.role): cliente, para el usuario final dueño de un
+//     tour puntual. Ve y edita escenas, hotspots y apariencia.
 //
 // Las escenas soportan dos orígenes de navegación (campo `origen`):
 //   - video_frame: frame extraído de un video 360° subido (ver VideoUpload + FFmpeg/Sharp)
 //   - panorama_upload: panorámica estática subida directamente, sin procesamiento de video
 // El resto del modelo (hotspots con lon/lat, tipo info/price/nav) es agnóstico al origen.
+//
+// Oleada 1 (personalización): Tour.design (documento de diseño v1), TourAsset (logo, video,
+// audio, imágenes subidas), SceneGroup (zonas/plantas, se usa desde la Oleada 4) y columnas
+// nuevas en Hotspot (style/locked/segments/content) y Scene (grupo, plano, modo de imagen).
+// Todo es aditivo: columnas nulas o con default, para migrar sin perder datos.
 
 generator client {
   provider = "prisma-client-js"
@@ -50,17 +54,16 @@ model User {
 // ── Tours y permisos ─────────────────────────────────────────────────────
 
 model Tour {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  createdById String
-  customCss   String? // libre, sin sandbox — gate: requireDevAccess (ver rbac.js)
-  customJs    String? // libre, sin sandbox — gate: requireDevAccess (ver rbac.js)
-  theme       Json? // { accentColor, borderRadius, tooltipStyle } — Track A
-  customTexts Json? // { welcomeMessage, ctaLabel, ... } — Track A
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  createdById   String
+  theme         Json? // { accentColor, borderRadius, tooltipStyle } — Track A
+  customTexts   Json? // { welcomeMessage, ctaLabel, ... } — Track A
   chatbotPrompt String? // persona del asistente por tour — Track B
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  design        Json? // Design v1 (ver docs/CONTRATO_OLEADA1.md §2); null = se deriva de theme/customTexts
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   createdBy    User             @relation("TourCreatedBy", fields: [createdById], references: [id])
   permissions  TourPermission[]
@@ -69,16 +72,16 @@ model Tour {
   exports      Export[]
   videoUploads VideoUpload[]
   menuItems    TourMenuItem[]
+  assets       TourAsset[]
+  sceneGroups  SceneGroup[]
 
   @@map("tours")
 }
 
-// cliente y dev ven y editan igual (escenas, hotspots, apariencia); dev además puede
-// tocar Tour.customCss/customJs (ver rbac.js -> requireDevAccess). Sin tier de solo
-// lectura: a diferencia del RBAC de Fase 0, aquí no existe un "viewer" por tour.
+// cliente ve y edita escenas, hotspots y apariencia. Sin tier de solo lectura: a
+// diferencia del RBAC de Fase 0, aquí no existe un "viewer" por tour.
 enum TourRole {
   cliente
-  dev
 }
 
 model TourPermission {
@@ -166,11 +169,19 @@ model Scene {
   orderIndex    Int         @default(0)
   initialYaw    Float       @default(0)
   initialPitch  Float       @default(0)
+  groupId       String? // zona/planta (SceneGroup) — Oleada 4
+  planX         Float? // posición en el plano de la zona — Oleada 4
+  planY         Float?
+  planHeading   Float?
+  imageMode     String? // null = usa design.panoramas.mode; "webp" | "tiles" — Oleada 2
+  tiles         Json? // { width, cols, rows, dir, status } — mosaicos de alta definición
+  sourcePath    String? // original subido, para regenerar mosaicos
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   tour        Tour           @relation(fields: [tourId], references: [id], onDelete: Cascade)
   videoUpload VideoUpload?   @relation(fields: [videoUploadId], references: [id])
+  group       SceneGroup?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
   hotspots    Hotspot[]
   navTargetOf Hotspot[]      @relation("HotspotTarget")
   menuItemsTo TourMenuItem[]
@@ -215,6 +226,10 @@ model Hotspot {
   price         String? // solo aplica si type = price
   targetSceneId String? // solo aplica si type = nav
   imagePath     String? // opcional, cualquier tipo — mismo patrón que Scene.webpPath
+  style         Json? // { template, props }; null = usa el preset de su tipo en design.hotspotPresets
+  locked        Boolean  @default(false) // bloqueado en el editor (no se arrastra)
+  segments      Json? // rangos de cuadros donde se ve (video) — Oleada 2
+  content       Json? // contenido enriquecido del panel de detalle — Oleada 2
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -222,6 +237,42 @@ model Hotspot {
   targetScene Scene? @relation("HotspotTarget", fields: [targetSceneId], references: [id])
 
   @@map("hotspots")
+}
+
+// Archivos subidos al tour (logo, video de fondo, póster, audio, planos). Imágenes → WebP;
+// video y audio se guardan tal cual. No se aceptan SVG (pueden llevar scripts).
+model TourAsset {
+  id           String   @id @default(uuid())
+  tourId       String
+  kind         String // image | video | audio
+  path         String // ruta pública, ej. /uploads/assets/<tourId>/<archivo>
+  mime         String
+  size         Int
+  width        Int?
+  height       Int?
+  originalName String
+  createdAt    DateTime @default(now())
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@map("tour_assets")
+}
+
+// Zona o planta del tour (agrupa escenas, con su plano). Se usa desde la Oleada 4.
+model SceneGroup {
+  id               String   @id @default(uuid())
+  tourId           String
+  code             String?
+  name             String
+  description      String?
+  floorplanAssetId String?
+  orderIndex       Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  tour   Tour    @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  scenes Scene[]
+
+  @@map("scene_groups")
 }
 
 // ── Exportación ───────────────────────────────────────────────────────────
@@ -238,4 +289,16 @@ model Export {
   createdBy User @relation(fields: [createdById], references: [id])
 
   @@map("exports")
+}
+
+// Biblioteca común de la única organización. No depende del tour de origen.
+// assets contiene copias independientes de los archivos usados por el diseño.
+model DesignTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  design    Json
+  assets    Json
+  createdAt DateTime @default(now())
+
+  @@map("design_templates")
 }

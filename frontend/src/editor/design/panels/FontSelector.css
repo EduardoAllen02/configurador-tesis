@@ -1,0 +1,15 @@
+.sp-font-trigger { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sp-font-trigger > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-font-trigger.sp-btn { width: 100%; }
+.sp-font-catalog { display: flex; flex-direction: column; gap: 16px; }
+.sp-font-catalog-controls { position: sticky; top: -16px; z-index: 1; display: flex; flex-direction: column; gap: 12px; margin: -16px -16px 0; padding: 16px; background: white; border-bottom: 1px solid var(--sp-line,#e3e5ec); }
+.sp-font-categories { display: flex; flex-wrap: wrap; gap: 6px; }
+.sp-font-categories .is-active { background: var(--studio-select-soft,#f0e7ff); border-color: var(--studio-select,#8b3dff); }
+.sp-font-options { display: flex; flex-direction: column; gap: 4px; }
+.sp-font-options h3 { font-size: 14px; line-height: 20px; padding: 0 4px 8px; }
+.sp-font-option { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px 12px; background: transparent; border: 1px solid transparent; border-radius: 8px; text-align: left; font-size: 16px; line-height: 24px; cursor: pointer; }
+.sp-font-option:hover { background: #f6f3fc; }
+.sp-font-option.is-active, .sp-font-option[aria-pressed=true] { border-color: var(--studio-select,#8b3dff); background: #f8f4ff; }
+.sp-font-sample { margin-left: auto; color: var(--text-soft); white-space: nowrap; }
+.sp-font-option > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-font-sample, .sp-font-option > svg { flex-shrink: 0; }

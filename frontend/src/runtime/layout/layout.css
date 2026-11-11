@@ -1,0 +1,134 @@
+/* Capa de elementos (HUD y pantalla de inicio): tokens "cristal oscuro" de Colombini, envoltorio
+   anclado y animaciones de entrada. Los envoltorios se posicionan con layout/engine.js. */
+
+.tour-rt-el,
+.tour-rt-intro {
+  --ink: #0e1728;
+  --glass: rgba(20, 37, 68, 0.5);
+  --line: rgba(255, 255, 255, 0.15);
+  --txt: #f6f8fb;
+  --txt-2: rgba(246, 248, 251, 0.72);
+  --txt-3: rgba(246, 248, 251, 0.48);
+  --on-accent: #101a2b;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --glass-shadow: 0 16px 44px -14px rgba(6, 12, 24, 0.6), 0 2px 8px rgba(6, 12, 24, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+/* Se coloca con left/top/width/height + scale(var(--s)) desde el pivote (inline, ver elementLayer). */
+.tour-rt-el {
+  position: absolute;
+  pointer-events: auto;
+  transform-origin: 0 0;
+}
+/* Piezas decorativas (texto, forma, cifras…): no capturan el puntero, el 360 sigue arrastrándose. */
+.tour-rt-el--through {
+  pointer-events: none;
+}
+.tour-rt-el--through a,
+.tour-rt-el--through button {
+  pointer-events: auto;
+}
+
+.tour-rt-el-anim {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Animación de entrada ("Animar"): ninguna / subir / aparecer / desenfoque ────────────
+   fill-mode "backwards": al terminar el elemento vuelve a su estilo natural (sin filter), así
+   el backdrop-filter del cristal de adentro no queda aislado por un ancestro con filter. */
+@keyframes tour-rt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes tour-rt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes tour-rt-blur {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+.tour-rt-anim--rise {
+  animation: tour-rt-rise 0.75s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)) var(--tour-anim-delay, 0ms) backwards;
+}
+.tour-rt-anim--fade {
+  animation: tour-rt-fade 0.6s ease var(--tour-anim-delay, 0ms) backwards;
+}
+.tour-rt-anim--blur {
+  animation: tour-rt-blur 0.75s var(--ease, cubic-bezier(0.22, 1, 0.36, 1)) var(--tour-anim-delay, 0ms) backwards;
+}
+
+/* ── Pantalla de inicio ─────────────────────────────────────────────── */
+.tour-rt-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--txt);
+  touch-action: none;
+  transition: opacity 0.8s var(--ease), filter 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.tour-rt-intro.is-leaving {
+  opacity: 0;
+  filter: blur(8px);
+  transform: scale(1.02);
+  pointer-events: none;
+}
+.tour-rt-intro-bg {
+  position: absolute;
+  inset: -3%;
+  transition: transform 0.9s var(--ease);
+  will-change: transform;
+}
+.tour-rt-intro-bg > video,
+.tour-rt-intro-bg > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tour-rt-intro-scrim,
+.tour-rt-intro-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tour-rt-intro-layer {
+  position: absolute;
+  inset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-rt-anim--rise,
+  .tour-rt-anim--fade,
+  .tour-rt-anim--blur {
+    animation: none;
+  }
+  .tour-rt-intro,
+  .tour-rt-intro-bg {
+    transition: none;
+  }
+}

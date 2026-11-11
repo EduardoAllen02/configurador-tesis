@@ -5,7 +5,7 @@ const { list, create, remove, redeem } = require("../controllers/invitations.con
 
 // Nido bajo /tours/:tourId/invitations — crear/listar/revocar es exclusivo de
 // Admin/Superadmin, igual que permissions.routes.js (mismo criterio: gestionar acceso a
-// un tour no es parte de lo que puede hacer su cliente/dev).
+// un tour no es parte de lo que puede hacer su cliente).
 const router = Router({ mergeParams: true });
 router.use(requireAuth, requireGlobalRole(["admin", "super_admin"]));
 router.get("/", list);

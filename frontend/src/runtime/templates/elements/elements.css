@@ -1,0 +1,401 @@
+/* Plantillas de elementos de pantalla. Look por defecto: "cristal oscuro" de Colombini (tokens
+   --ink/--glass/--line/--txt* definidos en layout/layout.css). Todo se puede cambiar por props. */
+
+.tour-rt-glass {
+  background: var(--glass, rgba(20, 37, 68, 0.5));
+  -webkit-backdrop-filter: blur(24px) saturate(1.7);
+  backdrop-filter: blur(24px) saturate(1.7);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.15));
+  border-radius: 5px;
+  box-shadow: var(
+    --glass-shadow,
+    0 16px 44px -14px rgba(6, 12, 24, 0.6),
+    0 2px 8px rgba(6, 12, 24, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09)
+  );
+}
+
+/* ── Texto ──────────────────────────────────────────────────────────── */
+.tour-rt-text {
+  margin: 0;
+  color: var(--txt, #f6f8fb);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.tour-rt-text--title {
+  font-family: var(--tour-font-heading, inherit);
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+/* Móvil: títulos más chicos (un `size` explícito en las props sigue mandando). */
+[data-tour-mobile] .tour-rt-text--title {
+  font-size: 38px;
+}
+.tour-rt-text--paragraph {
+  font-family: var(--tour-font-body, inherit);
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--txt-2, rgba(246, 248, 251, 0.72));
+}
+.tour-rt-text--kicker {
+  font-family: var(--tour-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--txt-3, rgba(246, 248, 251, 0.48));
+}
+.tour-rt-text[hidden] {
+  display: none;
+}
+
+/* ── Botón ──────────────────────────────────────────────────────────── */
+.tour-rt-btn {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px 14px 18px;
+  border: 0;
+  border-radius: 3px;
+  background: #fff;
+  color: #101a2b;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-family: var(--tour-font-body, inherit);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 12px 34px -12px #060c18b3;
+  transition: transform 0.25s var(--ease, ease), opacity 0.25s ease, background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.tour-rt-btn:hover {
+  transform: translateY(-1px);
+}
+.tour-rt-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.tour-rt-btn-icon {
+  display: inline-flex;
+  transition: transform 0.25s var(--ease, ease);
+}
+.tour-rt-btn-icon[hidden] {
+  display: none;
+}
+.tour-rt-btn:hover .tour-rt-btn-icon {
+  transform: translateX(4px);
+}
+.tour-rt-btn--glass {
+  background: var(--glass, rgba(20, 37, 68, 0.5));
+  color: var(--txt, #f6f8fb);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.15));
+  -webkit-backdrop-filter: blur(24px) saturate(1.7);
+  backdrop-filter: blur(24px) saturate(1.7);
+  box-shadow: var(--glass-shadow);
+}
+.tour-rt-btn--ghost {
+  background: transparent;
+  color: var(--txt, #f6f8fb);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.15));
+  box-shadow: none;
+}
+.tour-rt-btn:disabled,
+.tour-rt-btn[data-waiting] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.tour-rt-btn:disabled .tour-rt-btn-icon {
+  transform: none;
+}
+
+/* ── Imagen y forma ─────────────────────────────────────────────────── */
+.tour-rt-image,
+.tour-rt-shape {
+  width: 100%;
+  height: 100%;
+}
+.tour-rt-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.tour-rt-image--empty {
+  border: 1px dashed var(--line, rgba(255, 255, 255, 0.3));
+  border-radius: 4px;
+}
+
+/* ── Tarjeta de cristal ─────────────────────────────────────────────── */
+.tour-rt-gcard {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
+  color: var(--txt, #f6f8fb);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tour-rt-gcard-title {
+  margin: 0;
+  font-family: var(--tour-font-heading, inherit);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.tour-rt-gcard-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--txt-2, rgba(246, 248, 251, 0.72));
+  white-space: pre-line;
+}
+.tour-rt-gcard-children {
+  display: flex;
+  flex-direction: column;
+}
+.tour-rt-gcard [hidden] {
+  display: none;
+}
+
+/* ── Lista de características ───────────────────────────────────────── */
+.tour-rt-featurelist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tour-rt-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tour-rt-features li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tour-rt-features-icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--tour-feat-icon, var(--txt-2, rgba(246, 248, 251, 0.72)));
+}
+.tour-rt-features-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--tour-feat-text, var(--txt, #f6f8fb));
+}
+
+/* ── Contador rotativo ──────────────────────────────────────────────── */
+.tour-rt-counter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tour-rt-counter-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.tour-rt-counter-body.is-out {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.tour-rt-counter-value {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--tour-counter-color, var(--txt, #f6f8fb));
+  font-family: var(--tour-font-heading, inherit);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.tour-rt-counter-suffix {
+  font-size: 0.6em;
+  color: var(--txt-2, rgba(246, 248, 251, 0.72));
+}
+.tour-rt-counter-label {
+  font-size: 13px;
+  color: var(--txt-2, rgba(246, 248, 251, 0.72));
+}
+.tour-rt-counter-ticks {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.tour-rt-counter-ticks[hidden] {
+  display: none;
+}
+.tour-rt-counter-tick {
+  position: relative;
+  display: block;
+  width: 28px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+.tour-rt-counter-tick > b {
+  position: absolute;
+  inset: 0;
+  background: var(--tour-counter-color, var(--txt, #f6f8fb));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.tour-rt-counter-tick.is-done > b {
+  transform: scaleX(1);
+}
+.tour-rt-counter-tick.is-active > b {
+  animation: tour-rt-tick var(--tour-rotate, 4200ms) linear forwards;
+}
+@keyframes tour-rt-tick {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ── Fila de cifras ─────────────────────────────────────────────────── */
+.tour-rt-statsrow {
+  display: flex;
+  align-items: stretch;
+}
+.tour-rt-statsrow-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 28px;
+  border-left: 1px solid var(--line, rgba(255, 255, 255, 0.15));
+}
+.tour-rt-statsrow-item:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.tour-rt-statsrow-value {
+  font-family: var(--tour-font-heading, inherit);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--tour-stat-value, var(--txt, #f6f8fb));
+}
+.tour-rt-statsrow-label {
+  font-family: var(--tour-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tour-stat-label, var(--txt-3, rgba(246, 248, 251, 0.48)));
+}
+
+/* ── Selector de idioma ─────────────────────────────────────────────── */
+.tour-rt-lang {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+}
+.tour-rt-lang-btn {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--tour-lang-color-idle, var(--txt-2, rgba(246, 248, 251, 0.72)));
+  font-family: var(--tour-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.tour-rt-lang-btn:hover {
+  color: var(--txt, #f6f8fb);
+}
+.tour-rt-lang-btn.is-active {
+  background: var(--tour-lang-fill, #fff);
+  color: var(--tour-lang-color, #101a2b);
+}
+.tour-rt-lang-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+/* ── Indicador de carga ─────────────────────────────────────────────── */
+.tour-rt-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.tour-rt-loader-track {
+  position: relative;
+  display: block;
+  height: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.18);
+}
+.tour-rt-loader-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: var(--tour-loader-color, var(--txt, #f6f8fb));
+  animation: tour-rt-loader 1.3s var(--ease, ease) infinite;
+}
+.tour-rt-loader.is-ready .tour-rt-loader-fill {
+  width: 100%;
+  animation: none;
+}
+@keyframes tour-rt-loader {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-rt-btn,
+  .tour-rt-btn-icon,
+  .tour-rt-counter-body,
+  .tour-rt-lang-btn {
+    transition: none;
+  }
+  .tour-rt-counter-tick.is-active > b {
+    animation: none;
+    transform: scaleX(1);
+  }
+  .tour-rt-loader-fill {
+    animation: none;
+    width: 100%;
+  }
+}
+
+/* Theme variables live on the engine root and pass through every anchored wrapper. */
+.tour-rt-el, .tour-rt-intro {
+  --glass: var(--tour-theme-surface, rgba(20,37,68,.5));
+  --line: var(--tour-theme-border, rgba(255,255,255,.15));
+  --txt: var(--tour-theme-text, #f6f8fb);
+  --txt-2: var(--tour-theme-secondary, rgba(246,248,251,.72));
+  --txt-3: var(--tour-theme-secondary, rgba(246,248,251,.48));
+  --on-accent: var(--tour-theme-on-accent, #101a2b);
+}
+
+.tour-rt-group { position:relative; box-sizing:border-box; width:100%; color:var(--txt); }
+.tour-rt-group-inner { position:relative; transform-origin:0 0; }
+.tour-rt-group-child { position:absolute; box-sizing:border-box; pointer-events:none; }
+.tour-rt-group-child a, .tour-rt-group-child button { pointer-events:auto; }
+.tour-rt-btn.tour-rt-btn-composite { display:block; padding:0; text-align:left; }
+.tour-rt-btn--primary.tour-rt-btn-composite { color:#101a2b; }
+.tour-rt-btn--glass.tour-rt-btn-composite, .tour-rt-btn--ghost.tour-rt-btn-composite { color:var(--txt,#f6f8fb); }
+.tour-rt-btn-composite > .tour-rt-group-inner { pointer-events:none; }
+.tour-rt-icon { display:inline-flex; align-items:center; justify-content:center; }

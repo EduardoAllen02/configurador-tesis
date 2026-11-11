@@ -1,0 +1,397 @@
+/* Lienzo del estudio de diseño (C1). Medidas de docs/INVESTIGACION_CANVA.md §2–3; los colores
+   salen de los tokens de `.studio` (DesignStudio.css). */
+
+.cv-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Área y mesa de trabajo ─────────────────────────────────────────── */
+.cv-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--studio-canvas-bg);
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.cv-viewport:focus-visible {
+  outline: none;
+}
+
+.cv-viewport.is-drop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 2px var(--studio-select);
+  pointer-events: none;
+}
+
+.cv-stage {
+  position: absolute;
+}
+
+.cv-board {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  background: #111;
+  box-shadow: 0 0 0 0.5px rgba(40, 50, 80, 0.08), 0 2px 6px rgba(21, 30, 70, 0.1), 0 12px 36px rgba(21, 30, 70, 0.16);
+}
+
+/* Captura todos los punteros encima de la mesa: el motor solo dibuja, no recibe clics. */
+.cv-hit {
+  position: absolute;
+  inset: 0;
+}
+
+/* ── Selección ──────────────────────────────────────────────────────── */
+.cv-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cv-hover,
+.cv-sel,
+.cv-union {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.cv-hover {
+  outline: 2px solid var(--studio-select);
+  outline-offset: -1px;
+  opacity: 0.55;
+}
+
+.cv-sel {
+  outline: 2px solid var(--studio-select);
+  outline-offset: -1px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.07);
+}
+
+.cv-sel.is-editing {
+  outline-style: dashed;
+}
+
+/* Varios elementos: cada uno conserva su caja y una punteada rodea al conjunto. */
+.cv-union {
+  outline: 1.5px dashed var(--studio-select);
+  outline-offset: 5px;
+}
+
+.cv-handle {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.cv-handle > span {
+  pointer-events: none;
+  background: #fff;
+  box-shadow: 0 0 4px 1px rgba(57, 70, 96, 0.14), 0 0 0 1px rgba(43, 53, 74, 0.3);
+}
+
+.cv-handle--corner > span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.cv-handle--col > span {
+  width: 6px;
+  height: 18px;
+  border-radius: 3px;
+}
+
+.cv-handle--row > span {
+  width: 18px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.cv-handle:hover > span {
+  box-shadow: 0 0 0 2px var(--studio-select), 0 0 4px 1px rgba(57, 70, 96, 0.14);
+}
+
+.cv-auto {
+  position: absolute;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--studio-select);
+  border: 1px solid var(--studio-select);
+  font-size: var(--ui-font-size, 14px);
+  font-weight: 700;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.cv-size {
+  position: absolute;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--studio-select);
+  color: #fff;
+  font-size: var(--ui-font-size, 14px);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.cv-guide {
+  position: absolute;
+  background: var(--studio-guide, #ff3d9a);
+  pointer-events: none;
+}
+
+.cv-guide--v {
+  width: 1px;
+  margin-left: -0.5px;
+}
+
+.cv-guide--h {
+  height: 1px;
+  margin-top: -0.5px;
+}
+
+.cv-marquee {
+  position: absolute;
+  border: 1px solid var(--studio-select);
+  background: rgba(139, 61, 255, 0.08);
+  pointer-events: none;
+}
+
+/* ── Mini-barra flotante ────────────────────────────────────────────── */
+.cv-minibar {
+  position: absolute;
+  transform: translateX(-50%);
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 5px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(64, 79, 109, 0.07), 0 2px 6px rgba(21, 30, 130, 0.14), 0 6px 18px rgba(21, 30, 70, 0.08);
+  pointer-events: auto;
+}
+
+.cv-minibar button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: #0f1015;
+  cursor: pointer;
+}
+
+.cv-minibar button:hover:not(:disabled) {
+  background: rgba(64, 87, 109, 0.07);
+}
+
+.cv-minibar button[aria-pressed="true"] {
+  background: var(--studio-select-soft);
+  color: var(--studio-select);
+}
+
+.cv-minibar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.cv-minibar button:focus-visible {
+  outline: 2px solid var(--studio-select);
+  outline-offset: -2px;
+}
+
+/* ── Texto en el lugar ──────────────────────────────────────────────── */
+.cv-inline-editor {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  outline: 2px solid var(--studio-select);
+  outline-offset: 1px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* ── Barra inferior ─────────────────────────────────────────────────── */
+.cv-bar {
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: var(--ui-font-size, 14px);
+}
+
+.cv-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.cv-bar-group:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+}
+
+.cv-bar-btn {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cv-bar-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cv-bar-btn:hover {
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.cv-bar-btn.is-active {
+  background: var(--studio-select-soft);
+  color: var(--text);
+}
+
+.cv-bar-btn:focus-visible {
+  outline: 2px solid var(--studio-select);
+  outline-offset: -2px;
+}
+
+.cv-bar-note {
+  min-width: 0;
+  margin-left: 10px;
+  color: var(--text-faint);
+  font-size: var(--ui-font-size, 14px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cv-bar-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Keep controls reachable when a real desktop window is narrowed. */
+@media (max-width: 1200px) {
+  .cv-bar { flex-wrap: wrap; height: auto; min-height: 40px; flex-basis: auto; gap: 4px 8px; padding-top: 4px; padding-bottom: 4px; }
+  .cv-bar-zoom { margin-left: auto; }
+  .cv-bar-group:nth-child(2) { flex: none; max-width: 100%; flex-wrap: wrap; }
+}
+
+.cv-zoom-slider {
+  width: 160px;
+  accent-color: var(--studio-select);
+  cursor: pointer;
+}
+@media (max-width: 1200px) { .cv-zoom-slider { width: 100px; } }
+
+.cv-zoom-pct {
+  min-width: 64px;
+  justify-content: center;
+  color: var(--text);
+}
+
+.cv-zoom-menu-wrap {
+  position: relative;
+}
+
+.cv-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  min-width: 168px;
+  padding: 6px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(64, 79, 109, 0.1), 0 8px 28px rgba(21, 30, 70, 0.18);
+  z-index: 20;
+}
+
+.cv-menu-item {
+  width: 100%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cv-menu-item:hover {
+  background: var(--surface-sunken);
+}
+
+.cv-menu-item kbd {
+  font: inherit;
+  font-size: var(--ui-font-size, 14px);
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.cv-menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+
+.cv-group-bar { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 8px 16px; border-radius: 10px; max-width: 100%; box-sizing: border-box; background: #f5f0ff; color: #6137a8; font-size: var(--ui-font-size, 14px); }
+.cv-group-bar button { border: 0; background: transparent; color: inherit; font: inherit; font-weight: 600; cursor: pointer; }
+.cv-group-boundary { position: absolute; border: 1px dashed var(--studio-select); box-shadow: 0 0 0 9999px #10152212; pointer-events: none; }
+
+.cv-group-boundary.is-resizable { outline-offset:0; }

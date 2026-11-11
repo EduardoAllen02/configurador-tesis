@@ -32,7 +32,7 @@ export default function LoginPage() {
         <div className="stack" style={{ alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)" }}>
           <LogoMark width={30} height={30} strokeWidth={1.5} />
           <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.01em" }}>Bienvenido de vuelta</h1>
-          <p className="text-soft" style={{ fontSize: 13.5 }}>Entra a tu cuenta de Tour Studio</p>
+          <p className="text-soft" style={{ fontSize: 14 }}>Entra a tu cuenta de Tour Studio</p>
         </div>
 
         <form onSubmit={handleSubmit} className="stack">
@@ -43,6 +43,7 @@ export default function LoginPage() {
           <div className="field">
             <label className="field-label" htmlFor="login-password">Contraseña</label>
             <input id="login-password" className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Link to="/forgot-password" style={{ fontSize: 13, alignSelf: "flex-end" }}>¿Olvidaste tu contraseña?</Link>
           </div>
           {error && <p className="error-text">{error}</p>}
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: "100%", padding: "10px 16px" }}>
@@ -50,7 +51,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-soft" style={{ fontSize: 13.5, textAlign: "center" }}>
+        <p className="text-soft" style={{ fontSize: 14, textAlign: "center" }}>
           ¿No tienes cuenta? <Link to="/register" style={{ color: "var(--text)", fontWeight: 500 }}>Regístrate</Link>
         </p>
       </div>

@@ -1,6 +1,14 @@
 const prisma = require("../config/prisma");
 const { hashPassword, comparePassword, signToken } = require("../services/auth.service");
 const { asyncHandler } = require("../utils/asyncHandler");
+const { createPasswordRecovery } = require("../services/passwordReset");
+const { sendResetMail } = require("../services/passwordResetMail");
+const { jwtSecret } = require("../config/env");
+
+const { forgotPassword, resetPassword } = createPasswordRecovery({
+  prisma, hashPassword, sendMail: sendResetMail,
+  secret: process.env.PASSWORD_RESET_SECRET, authSecret: jwtSecret,
+});
 
 const register = asyncHandler(async (req, res) => {
   const { email, password, fullName } = req.body;
@@ -43,4 +51,4 @@ const me = asyncHandler(async (req, res) => {
   res.json({ id: user.id, email: user.email, fullName: user.fullName, globalRole: user.globalRole });
 });
 
-module.exports = { register, login, me };
+module.exports = { register, login, me, forgotPassword, resetPassword };

@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { asyncHandler } = require("../utils/asyncHandler");
+const { isValidTourRole } = require("../services/accessRules");
 
 const list = asyncHandler(async (req, res) => {
   const permissions = await prisma.tourPermission.findMany({
@@ -12,11 +13,17 @@ const list = asyncHandler(async (req, res) => {
 const create = asyncHandler(async (req, res) => {
   const { userId, role } = req.body;
   if (!userId || !role) return res.status(400).json({ error: "userId y role son requeridos" });
+  if (!isValidTourRole(role)) return res.status(400).json({ error: "role inválido" });
 
-  const permission = await prisma.tourPermission.create({
-    data: { tourId: req.params.tourId, userId, role },
-  });
-  res.status(201).json(permission);
+  try {
+    const permission = await prisma.tourPermission.create({
+      data: { tourId: req.params.tourId, userId, role },
+    });
+    res.status(201).json(permission);
+  } catch (err) {
+    if (err.code === "P2002") return res.status(409).json({ error: "Ese usuario ya tiene acceso al tour" });
+    throw err;
+  }
 });
 
 const update = asyncHandler(async (req, res) => {

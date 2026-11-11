@@ -9,7 +9,7 @@ const dateFormatter = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: 
 
 export default function ToursListPage() {
   const { user } = useAuth();
-  // Crear tours es exclusivo de Admin/Superadmin (Cliente/Dev reciben acceso a uno ya
+  // Crear tours es exclusivo de Admin/Superadmin (Cliente recibe acceso a uno ya
   // existente); borrar un tour es irreversible, exclusivo de Superadmin.
   const canCreate = user?.globalRole === "admin" || user?.globalRole === "super_admin";
   const canDelete = user?.globalRole === "super_admin";
@@ -131,10 +131,10 @@ export default function ToursListPage() {
                 <div className="row" style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>
                   {tour.title}
                 </div>
-                <p className="text-soft" style={{ fontSize: 13, minHeight: 18 }}>
+                <p className="text-soft" style={{ fontSize: 14, minHeight: 18 }}>
                   {tour.description || "Sin descripción"}
                 </p>
-                <p className="text-faint" style={{ fontSize: 12 }}>
+                <p className="text-faint" style={{ fontSize: 14 }}>
                   Creado el {dateFormatter.format(new Date(tour.createdAt))}
                 </p>
               </div>

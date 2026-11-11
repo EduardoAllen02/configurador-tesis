@@ -71,6 +71,11 @@ export function useSceneEditor(tourId) {
     await reload();
   }
 
+  async function renameScene(sceneId, name) {
+    const saved = await api.patch(`/api/tours/${tourId}/scenes/${sceneId}`, { name: name.trim() || null });
+    setScenes((previous) => previous.map((scene) => scene.id === sceneId ? { ...scene, name: saved.name } : scene));
+  }
+
   // Procesa el video síncronamente en el backend (FFmpeg+Sharp) — puede tardar según
   // duración/frameInterval; el caller debe mostrar un estado de "procesando".
   async function uploadVideo({ file, frameInterval }) {
@@ -82,5 +87,5 @@ export function useSceneEditor(tourId) {
     return result;
   }
 
-  return { scenes, error, reload, uploadPanoramasBulk, reorderScenes, uploadVideo, removeScene };
+  return { scenes, error, reload, uploadPanoramasBulk, reorderScenes, uploadVideo, removeScene, renameScene };
 }

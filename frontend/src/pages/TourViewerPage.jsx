@@ -1,94 +1,44 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { api } from "../api/client";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { previewEditorHref } from "../editor/components/previewNavigation.js";
 import TourViewer from "../viewer/components/TourViewer.jsx";
 import AppShell from "../components/ui/AppShell.jsx";
 import { PencilIcon } from "../components/ui/Icon.jsx";
-import { sceneLabel } from "../editor/utils/sceneLabel.js";
+import { api } from "../api/client";
 
-// Carga el tour + escenas y adjunta los hotspots de cada escena una sola vez, para que
-// el visor pueda cambiar de escena/frame sin volver a pedirlos a la API.
+// Visor del tour a pantalla completa. El motor (runtime/) pinta el topbar, el selector de
+// escenas, el contador, el scrubber y el panel de detalle; la página solo aporta el AppShell
+// y el acceso a "Editar". El documento sale del mismo serializador que usa el export, así
+// que lo que se ve aquí es lo que se exporta.
 export default function TourViewerPage() {
   const { tourId } = useParams();
-  const [tour, setTour] = useState(null);
-  const [scenes, setScenes] = useState([]);
-  const [activeSceneId, setActiveSceneId] = useState(null);
+  const location = useLocation();
+  const [doc, setDoc] = useState(null);
   const [error, setError] = useState(null);
-  const [frame, setFrame] = useState({ index: 0, total: 0 });
-  const handleFrameChange = useCallback(
-    (index, total) => setFrame((prev) => (prev.index === index && prev.total === total ? prev : { index, total })),
-    []
-  );
 
   useEffect(() => {
     let cancelled = false;
-
-    async function load() {
-      try {
-        const tourData = await api.get(`/api/tours/${tourId}`);
-        const scenesWithHotspots = await Promise.all(
-          tourData.scenes.map(async (scene) => ({
-            ...scene,
-            hotspots: await api.get(`/api/tours/${tourId}/scenes/${scene.id}/hotspots`),
-          }))
-        );
-        if (cancelled) return;
-        setTour(tourData);
-        setScenes(scenesWithHotspots);
-        setActiveSceneId(scenesWithHotspots[0]?.id ?? null);
-      } catch (err) {
+    setDoc(null);
+    setError(null);
+    api
+      .get(`/api/tours/${tourId}/document`)
+      .then((loaded) => {
+        if (!cancelled) setDoc(loaded);
+      })
+      .catch((err) => {
         if (!cancelled) setError(err.message);
-      }
-    }
-    load();
+      });
     return () => {
       cancelled = true;
     };
   }, [tourId]);
 
   return (
-    <AppShell fullBleed crumbs={[{ label: tour?.title ?? "Cargando…" }]}>
-      <div style={{ height: "calc(100vh - 53px)", display: "flex", flexDirection: "column" }}>
+    <AppShell fullBleed className="app-shell--viewer" crumbs={[{ label: doc?.tour.title ?? "Cargando…" }]} headerAction={<Link to={previewEditorHref(tourId, location)} className="btn btn-secondary btn-sm"><PencilIcon width={15} height={15} />Volver a editar</Link>}>
+      <div className="tour-viewer-page">
         {error && <p className="error-text" style={{ padding: "var(--space-4)" }}>{error}</p>}
-        {tour && (
-          <>
-            <div className="row" style={{ padding: "10px var(--space-6)", borderBottom: "1px solid var(--border)", background: "var(--surface)" }}>
-              <select
-                className="select"
-                style={{ maxWidth: 260 }}
-                value={activeSceneId ?? ""}
-                onChange={(e) => setActiveSceneId(e.target.value)}
-              >
-                {scenes.map((scene, index) => (
-                  <option key={scene.id} value={scene.id}>
-                    {sceneLabel(scene, index)}
-                  </option>
-                ))}
-              </select>
-              <span className="text-faint" style={{ fontSize: 13 }}>
-                {frame.total > 1 ? `${frame.index + 1} / ${frame.total}` : `${scenes.findIndex((s) => s.id === activeSceneId) + 1} / ${scenes.length}`}
-              </span>
-              {tour.customTexts?.welcomeMessage && (
-                <span className="text-soft" style={{ fontSize: 13 }}>· {tour.customTexts.welcomeMessage}</span>
-              )}
-              <span style={{ flex: 1 }} />
-              <Link to={`/tours/${tourId}/edit`} className="btn btn-secondary btn-sm">
-                <PencilIcon width={15} height={15} />
-                Editar
-              </Link>
-            </div>
-            <div style={{ flex: 1, position: "relative", background: "#111" }}>
-              {activeSceneId && (
-                <TourViewer
-                  scenes={scenes}
-                  activeSceneId={activeSceneId}
-                  onSceneChange={setActiveSceneId}
-                  onFrameChange={handleFrameChange}
-                  theme={tour.theme}
-                />
-              )}
-            </div>
-          </>
+        {doc && (
+          <TourViewer doc={doc} />
         )}
       </div>
     </AppShell>

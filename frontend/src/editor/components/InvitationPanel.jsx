@@ -26,7 +26,6 @@ export default function InvitationPanel({ invitations, error, onCreate, onRemove
           <label className="field-label">Rol</label>
           <select className="select" value={role} onChange={(e) => setRole(e.target.value)}>
             <option value="cliente">Cliente</option>
-            <option value="dev">Dev (código personalizado)</option>
           </select>
         </div>
         <div className="field">
@@ -56,7 +55,7 @@ export default function InvitationPanel({ invitations, error, onCreate, onRemove
               <span className={`badge ${inv.usedAt ? "badge-role-nav" : "badge-role-info"}`}>
                 {inv.usedAt ? "Usado" : "Pendiente"}
               </span>
-              <code className="text-soft" style={{ flex: 1, fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <code className="text-soft" style={{ flex: 1, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 /invitations/{inv.token}
               </code>
               <button className="btn btn-secondary btn-sm" onClick={() => copyLink(inv)}>

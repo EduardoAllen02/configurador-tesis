@@ -1,27 +1,35 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import ContentStudio from "../editor/design/ContentStudio.jsx";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import { useAuth } from "../auth/useAuth.js";
 import { useSceneEditor } from "../editor/hooks/useSceneEditor.js";
 import { useHotspotEditor } from "../editor/hooks/useHotspotEditor.js";
-import { useInvitations } from "../editor/hooks/useInvitations.js";
-import { useExports } from "../editor/hooks/useExports.js";
 import AppShell from "../components/ui/AppShell.jsx";
 import Disclosure from "../components/ui/Disclosure.jsx";
-import { UploadIcon, VideoIcon, EyeIcon } from "../components/ui/Icon.jsx";
+import { UploadIcon, VideoIcon } from "../components/ui/Icon.jsx";
 import SceneRail from "../editor/components/SceneRail.jsx";
 import EditorViewer from "../editor/components/EditorViewer.jsx";
 import VideoUploadForm from "../editor/components/VideoUploadForm.jsx";
 import HotspotList from "../editor/components/HotspotList.jsx";
-import InvitationPanel from "../editor/components/InvitationPanel.jsx";
-import AppearancePanel from "../editor/components/AppearancePanel.jsx";
-import ExportPanel from "../editor/components/ExportPanel.jsx";
+import EditorHeader from "../editor/components/EditorHeader.jsx";
+import { previewHref } from "../editor/components/previewNavigation.js";
+import TourSettingsPanel from "../editor/components/TourSettingsPanel.jsx";
+import { TourDesignProvider } from "../editor/hooks/useTourDesign.jsx";
+import { buildModel } from "../runtime/model/tourModel.js";
+import { hotspotPositionAt } from "../runtime/model/segments.js";
 
 export default function TourEditorPage() {
   const { tourId } = useParams();
-  const { user } = useAuth();
-  const canManageAccess = user?.globalRole === "admin" || user?.globalRole === "super_admin";
+  return (
+    <TourDesignProvider tourId={tourId}>
+      <TourEditorContent tourId={tourId} />
+    </TourDesignProvider>
+  );
+}
+
+function TourEditorContent({ tourId }) {
   const [tour, setTour] = useState(null);
+  const navigate = useNavigate();
   const {
     scenes,
     error: scenesError,
@@ -29,22 +37,21 @@ export default function TourEditorPage() {
     reorderScenes,
     uploadVideo,
     removeScene,
+    renameScene,
+    reload: reloadScenes,
   } = useSceneEditor(tourId);
   const [activeSceneId, setActiveSceneId] = useState(null);
+  const [editInterface, setEditInterface] = useState(false);
   const [showVideoUpload, setShowVideoUpload] = useState(false);
   const editorViewerRef = useRef(null);
   const {
     hotspots,
+    allHotspots,
     error: hotspotsError,
     createHotspot,
     updateHotspot,
     removeHotspot,
   } = useHotspotEditor(tourId, activeSceneId);
-  const { invitations, error: invitationsError, createInvitation, removeInvitation } = useInvitations(
-    tourId,
-    canManageAccess
-  );
-  const { exports, error: exportsError, exporting, createExport } = useExports(tourId);
 
   useEffect(() => {
     api.get(`/api/tours/${tourId}`).then(setTour).catch(() => {});
@@ -61,20 +68,60 @@ export default function TourEditorPage() {
   }, [scenes, activeSceneId]);
 
   const activeScene = scenes.find((s) => s.id === activeSceneId);
+  const sceneRevision = useMemo(() => JSON.stringify(scenes.map(({ id, name }) => [id, name])), [scenes]);
+
+  // En un video, la lista muestra lo que se ve en el cuadro actual (incluidos los hotspots de
+  // otros cuadros cuyo segmento lo cubre), con la posición interpolada de ese cuadro.
+  const sceneModel = useMemo(() => buildModel({ scenes }), [scenes]);
+  const listHotspots = useMemo(() => {
+    const located = activeScene && sceneModel.batchByScene.get(activeScene.id);
+    if (!located || activeScene.origen !== "video_frame") return hotspots;
+    const last = located.batch.scenes.length - 1;
+    const visible = [];
+    located.batch.scenes.forEach((s, ownIndex) => {
+      allHotspots
+        .filter((h) => h.sceneId === s.id)
+        .forEach((h) => {
+          const pos = hotspotPositionAt(h, located.index, ownIndex, last);
+          if (pos) visible.push({ ...h, lon: pos.lon, lat: pos.lat });
+        });
+    });
+    return visible;
+  }, [activeScene, sceneModel, allHotspots, hotspots]);
 
   async function handleRemoveScene(sceneId) {
     if (!confirm("¿Eliminar esta escena? Sus hotspots también se borran.")) return;
     await removeScene(sceneId);
   }
 
-  async function handleSaveAppearance(data) {
-    const updated = await api.patch(`/api/tours/${tourId}`, data);
-    setTour(updated);
+  // Un video entero: se borran todos sus cuadros (el backend no tiene un borrado por lote).
+  async function handleRemoveVideo(sceneIds) {
+    if (!confirm(`¿Eliminar este video completo (${sceneIds.length} cuadros)? Sus hotspots también se borran.`)) return;
+    for (let i = 0; i < sceneIds.length; i += 6) {
+      await Promise.all(sceneIds.slice(i, i + 6).map((id) => api.delete(`/api/tours/${tourId}/scenes/${id}`)));
+    }
+    await reloadScenes();
   }
 
   return (
-    <AppShell crumbs={[{ label: tour?.title ?? "Cargando…" }]}>
-      <div className="page-header">
+    <AppShell fullBleed header={<EditorHeader tourId={tourId} title={tour?.title ?? "Cargando…"} onPreview={async event => { event.preventDefault(); try { await editorViewerRef.current?.flush(); navigate(previewHref(tourId, `/tours/${tourId}/edit`), { state: { editorOrigin: `/tours/${tourId}/edit` } }); } catch {} }} />}>
+      <div className="content-editor-page">
+
+
+      <section className="section">
+        {scenes.length === 0 ? (
+          <><div className="page-header"><h1 className="page-title">{tour?.title}</h1></div><EmptyScenesState
+            uploading={false}
+            onAddFiles={(files, onProgress) => uploadPanoramasBulk(files, onProgress)}
+            showVideoUpload={showVideoUpload}
+            onToggleVideoUpload={() => setShowVideoUpload((v) => !v)}
+            onUploadVideo={uploadVideo}
+          /></>
+        ) : (
+          <>
+            <div className="editor-layout">
+              <aside className="content-scene-sidebar">
+      <div className="content-scene-heading">
         <div>
           <h1 className="page-title">{tour?.title ?? "Editar tour"}</h1>
           <p className="page-subtitle">
@@ -83,52 +130,48 @@ export default function TourEditorPage() {
               : "Arrastra tus panorámicas para empezar a armar el recorrido."}
           </p>
         </div>
-        <Link to={`/tours/${tourId}/view`} className="btn btn-secondary btn-sm">
-          <EyeIcon width={15} height={15} />
-          Vista previa
-        </Link>
       </div>
+            <div className="content-mode-buttons" role="group" aria-label="Edición del contenido">
+              <button type="button" className={`btn btn-sm ${!editInterface ? "btn-primary" : "btn-secondary"}`} onClick={() => setEditInterface(false)}>Hotspots y panorama</button>
+              <button type="button" className={`btn btn-sm ${editInterface ? "btn-primary" : "btn-secondary"}`} onClick={() => setEditInterface(true)}>Elementos 2D</button>
+            </div>
 
-      <section className="section">
-        {scenes.length === 0 ? (
-          <EmptyScenesState
-            uploading={false}
-            onAddFiles={(files, onProgress) => uploadPanoramasBulk(files, onProgress)}
-            showVideoUpload={showVideoUpload}
-            onToggleVideoUpload={() => setShowVideoUpload((v) => !v)}
-            onUploadVideo={uploadVideo}
-          />
-        ) : (
-          <>
-            <div className="editor-layout">
               <SceneRail
                 scenes={scenes}
                 activeSceneId={activeSceneId}
-                onSelect={setActiveSceneId}
+                onSelect={async id => { try { await editorViewerRef.current?.flush(); setActiveSceneId(id); } catch {} }}
                 onRemove={handleRemoveScene}
+                onRemoveVideo={handleRemoveVideo}
                 onReorder={reorderScenes}
+                onRename={renameScene}
                 onAddFiles={uploadPanoramasBulk}
               />
-              <EditorViewer
+              </aside>
+              {editInterface ? <ContentStudio tourId={tourId} sceneId={activeSceneId} sceneRevision={sceneRevision} /> : <EditorViewer
                 ref={editorViewerRef}
                 scene={activeScene}
-                hotspots={hotspots}
+                hotspots={allHotspots}
                 scenes={scenes}
                 onCreateHotspot={createHotspot}
                 onUpdateHotspot={updateHotspot}
                 onDeleteHotspot={removeHotspot}
                 onNavigateScene={setActiveSceneId}
+                onFrameChange={setActiveSceneId}
                 theme={tour?.theme}
-              />
+              />}
             </div>
             {scenesError && <p className="error-text" style={{ marginTop: "var(--space-3)" }}>{scenesError}</p>}
             {hotspotsError && <p className="error-text" style={{ marginTop: "var(--space-3)" }}>{hotspotsError}</p>}
 
             <div className="stack" style={{ marginTop: "var(--space-4)" }}>
-              {hotspots.length > 0 && (
-                <Disclosure title={`Hotspots de esta escena (${hotspots.length})`}>
+              {listHotspots.length > 0 && (
+                <Disclosure
+                  title={`Hotspots ${activeScene?.origen === "video_frame" ? "en este cuadro" : "de esta escena"} (${listHotspots.length})`}
+                >
                   <HotspotList
-                    hotspots={hotspots}
+                    hotspots={listHotspots}
+                    onCreate={createHotspot}
+                    onUpdate={updateHotspot}
                     onRemove={removeHotspot}
                     onFocus={(lon, lat) => editorViewerRef.current?.focusHotspot(lon, lat)}
                     onEdit={(hotspot, rect) =>
@@ -148,35 +191,30 @@ export default function TourEditorPage() {
         )}
       </section>
 
-      {tour && (
-        <section className="section">
-          <div className="section-header">
-            <span className="section-title">Apariencia</span>
-          </div>
-          <AppearancePanel tour={tour} onSave={handleSaveAppearance} />
-        </section>
-      )}
-
-      {canManageAccess && (
-        <section className="section">
-          <div className="section-header">
-            <span className="section-title">Compartir por enlace</span>
-          </div>
-          <InvitationPanel
-            invitations={invitations}
-            error={invitationsError}
-            onCreate={createInvitation}
-            onRemove={removeInvitation}
-          />
-        </section>
-      )}
-
       <section className="section">
         <div className="section-header">
-          <span className="section-title">Exportar</span>
+          <span className="section-title">Apariencia</span>
         </div>
-        <ExportPanel exports={exports} error={exportsError} exporting={exporting} onExport={createExport} />
+        <div className="card row appearance-link-card">
+          <p style={{ margin: 0, color: "var(--text-soft)" }}>
+            Colores, textos, botones, pantalla de inicio y estilo de los hotspots se editan en el estudio de Interfaz.
+          </p>
+          <Link to={`/tours/${tourId}/design`} className="btn btn-primary btn-sm">
+            Abrir Interfaz
+          </Link>
+        </div>
       </section>
+
+      {scenes.length > 0 && (
+        <section className="section">
+          <div className="section-header">
+            <span className="section-title">Ajustes del recorrido</span>
+          </div>
+          <TourSettingsPanel sceneRevision={sceneRevision} />
+        </section>
+      )}
+
+      </div>
     </AppShell>
   );
 }
@@ -188,7 +226,7 @@ function EmptyScenesState({ onAddFiles, showVideoUpload, onToggleVideoUpload, on
   function handleFiles(fileList) {
     const files = Array.from(fileList || []);
     if (!files.length) return;
-    const ids = files.map(() => Symbol("upload"));
+    const ids = files.map((_, i) => `upload-${Date.now()}-${i}-${Math.random()}`); // React keys must be strings.
     setUploads((prev) => [...prev, ...files.map((file, i) => ({ id: ids[i], file, pct: 0 }))]);
     onAddFiles(files, (i, patch) => {
       if (patch.status === "done") {
@@ -248,7 +286,7 @@ function EmptyScenesState({ onAddFiles, showVideoUpload, onToggleVideoUpload, on
       {uploads.length > 0 && (
         <div className="stack" style={{ padding: "0 var(--space-6) var(--space-6)", gap: "var(--space-2)" }}>
           {uploads.map((u) => (
-            <div key={u.id} className="row" style={{ fontSize: 13 }}>
+            <div key={u.id} className="row" style={{ fontSize: 14 }}>
               <span className="text-soft" style={{ flex: 1 }}>{u.file.name}</span>
               <span className="text-faint">{u.status === "error" ? u.error : `${Math.round((u.pct ?? 0) * 100)}%`}</span>
             </div>

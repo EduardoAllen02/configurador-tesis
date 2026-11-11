@@ -1,0 +1,322 @@
+/* Estilos del motor del tour. Se compilan a dist-runtime/tour-runtime.css y también los carga
+   la app: no dependen de ninguna variable ni reset de index.css (el export no los trae). */
+
+/* Inter variable autoalojada (@fontsource-variable/inter), con nombre propio para que la app
+   y el export usen exactamente el mismo archivo: la app además carga Inter de Google Fonts,
+   pero el bundle exportado no tiene internet garantizado. En el build del motor queda
+   incrustada en el CSS (assetsInlineLimit en vite.runtime.config.js). */
+@font-face {
+  font-family: "TourInter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "TourInter";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+.tour-rt-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: "TourInter", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tour-rt-root *,
+.tour-rt-root *::before,
+.tour-rt-root *::after {
+  box-sizing: border-box;
+}
+
+/* Capa de UI del diseño: no captura punteros salvo en sus piezas (que además llevan data-ui). */
+.tour-rt-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.tour-rt-el {
+  position: absolute;
+  pointer-events: auto;
+}
+
+/* Mensaje de carga / error / tour vacío. Va debajo de la UI y no recibe punteros. */
+.tour-rt-status {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.tour-rt-status[hidden] {
+  display: none;
+}
+
+.tour-rt-status--loading::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: tour-rt-spin 0.7s linear infinite;
+}
+
+@keyframes tour-rt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Marcadores sobre la esfera ─────────────────────────────────────── */
+/* Tamaño, relleno, borde y glifo llegan por props de la plantilla circle-icon (estilo inline);
+   aquí solo lo común a cualquier marcador circular. */
+.hs-marker-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: var(--tour-accent, #4da3ff);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s ease;
+}
+
+.hs-marker-btn:hover {
+  transform: scale(1.12);
+}
+
+/* ── Topbar básico ──────────────────────────────────────────────────── */
+.tour-rt-topbar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  background: rgba(17, 17, 17, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.tour-rt-topbar-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tour-rt-topbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tour-rt-topbar-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tour-rt-topbar-subtitle[hidden],
+.tour-rt-topbar-select[hidden] {
+  display: none;
+}
+
+.tour-rt-topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.tour-rt-topbar-select {
+  max-width: 240px;
+  height: 32px;
+  padding: 0 10px;
+  font: inherit;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: calc(var(--tour-radius, 8px) / 2);
+  cursor: pointer;
+}
+
+.tour-rt-topbar-select option {
+  color: #111;
+  background: #fff;
+}
+
+.tour-rt-topbar-counter {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.72);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* En móvil el título manda: sin subtítulo y el selector de escena cede espacio. */
+[data-tour-mobile] .tour-rt-topbar {
+  gap: 10px;
+  padding: 0 12px;
+}
+
+[data-tour-mobile] .tour-rt-topbar-subtitle {
+  display: none;
+}
+
+[data-tour-mobile] .tour-rt-topbar-heading {
+  flex: 1 1 40%;
+}
+
+[data-tour-mobile] .tour-rt-topbar-controls {
+  flex-shrink: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+[data-tour-mobile] .tour-rt-topbar-select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ── Scrubber de cuadros ────────────────────────────────────────────── */
+.tour-rt-scrub {
+  position: relative;
+  height: 100%;
+  touch-action: none;
+}
+
+.tour-rt-scrub-track {
+  position: relative;
+  height: 6px;
+  margin-top: 12px;
+  border-radius: var(--tour-radius, 3px);
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+
+.tour-rt-scrub-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--tour-accent, #4da3ff);
+  border-radius: var(--tour-radius, 3px);
+}
+
+.tour-rt-scrub-knob {
+  position: absolute;
+  top: -5px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background: var(--tour-accent, #4da3ff);
+}
+
+.tour-rt-scrub-label {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #ccc;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Panel de detalle (floating-card) ───────────────────────────────── */
+.tour-rt-card {
+  position: absolute;
+  right: 16px;
+  top: var(--tour-rt-top, 16px);
+  width: 260px;
+  max-width: calc(100% - 32px);
+  max-height: calc(100% - var(--tour-rt-top, 16px) - 16px);
+  overflow: auto;
+  padding: 1rem;
+  pointer-events: auto;
+  border-radius: var(--tour-radius, 8px);
+  border-left: 4px solid var(--tour-accent, #4da3ff);
+}
+
+.tour-rt-card--dark {
+  background: rgba(20, 20, 20, 0.92);
+  color: #eee;
+}
+
+.tour-rt-card--light {
+  background: rgba(255, 255, 255, 0.96);
+  color: #1a1a18;
+}
+
+.tour-rt-card h3 {
+  margin: 0 0 0.4em;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.tour-rt-card p {
+  margin: 0 0 0.4em;
+}
+
+.tour-rt-card img {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+}
+
+.tour-rt-card-price {
+  color: var(--tour-accent, #4da3ff);
+}
+
+.tour-rt-card-close {
+  float: right;
+  margin: 0;
+  padding: 0 0 0 8px;
+  font: inherit;
+  font-size: 1.2em;
+  line-height: 1;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}

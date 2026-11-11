@@ -33,7 +33,7 @@ export default function RegisterPage() {
         <div className="stack" style={{ alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)" }}>
           <LogoMark width={30} height={30} strokeWidth={1.5} />
           <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.01em" }}>Crea tu cuenta</h1>
-          <p className="text-soft" style={{ fontSize: 13.5 }}>Empieza a construir tu primer tour</p>
+          <p className="text-soft" style={{ fontSize: 14 }}>Empieza a construir tu primer tour</p>
         </div>
 
         <form onSubmit={handleSubmit} className="stack">
@@ -55,7 +55,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-soft" style={{ fontSize: 13.5, textAlign: "center" }}>
+        <p className="text-soft" style={{ fontSize: 14, textAlign: "center" }}>
           ¿Ya tienes cuenta? <Link to="/login" style={{ color: "var(--text)", fontWeight: 500 }}>Inicia sesión</Link>
         </p>
       </div>

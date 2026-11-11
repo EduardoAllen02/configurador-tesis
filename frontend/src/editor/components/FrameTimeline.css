@@ -1,0 +1,263 @@
+/* Lienzo + línea de tiempo apilados: el lienzo se encoge y la línea de tiempo toma su alto. */
+.editor-viewer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  min-height: 0;
+}
+
+.editor-viewer-stack > .editor-viewer {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+}
+
+/* Con video hay más que mostrar: el editor crece un poco. */
+.editor-layout:has(.frame-timeline) {
+  height: 700px;
+}
+
+.frame-timeline {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--ui-font-size, 14px);
+}
+
+.ft-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 28px;
+}
+
+.ft-title {
+  font-weight: 600;
+}
+
+.ft-count,
+.ft-selected {
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.ft-selected {
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ft-spacer {
+  flex: 1;
+}
+
+.ft-body {
+  position: relative;
+  user-select: none;
+}
+
+.ft-line {
+  display: flex;
+  align-items: stretch;
+}
+
+.ft-label {
+  flex: 0 0 132px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 8px 0 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-soft);
+}
+
+.ft-row-selected .ft-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ft-label-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ft-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ft-color);
+}
+
+.ft-track {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 24px;
+}
+
+.ft-ruler {
+  height: 26px;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  touch-action: none;
+}
+
+.ft-ruler:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.ft-tick {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  font-size: var(--ui-font-size, 14px);
+  color: var(--text-faint);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Regla y filas comparten el mismo contenedor con scroll: así las pistas miden lo mismo. */
+.ft-scroll {
+  max-height: 156px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.ft-ruler-line {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  padding-bottom: 4px;
+  background: var(--surface);
+}
+
+.ft-rows {
+  margin-top: 0;
+}
+
+.ft-row .ft-track {
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.ft-row-selected {
+  background: color-mix(in srgb, var(--ft-color) 8%, transparent);
+}
+
+.ft-empty {
+  margin: 4px 0 2px;
+  color: var(--text-faint);
+  font-size: var(--ui-font-size, 14px);
+}
+
+.ft-bar {
+  position: absolute;
+  top: 10px;
+  bottom: 3px;
+  min-width: 4px;
+  border-radius: 4px;
+  background: var(--ft-color);
+  opacity: 0.55;
+}
+
+.ft-row-selected .ft-bar {
+  opacity: 1;
+}
+
+.ft-handle {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 10px;
+  padding: 0;
+  border: 2px solid var(--ft-color);
+  background: var(--surface);
+  border-radius: 4px;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 3;
+}
+
+.ft-handle-from {
+  left: -5px;
+}
+
+.ft-handle-to {
+  right: -5px;
+}
+
+.ft-handle:focus-visible {
+  outline: 2px solid var(--focus);
+}
+
+/* Los rombos van sobre la barra (no encima de las manijas, que viven en los extremos). */
+.ft-key {
+  position: absolute;
+  top: 5px;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  margin: -4.5px 0 0 -4.5px;
+  transform: rotate(45deg);
+  border: 2px solid var(--ft-color);
+  background: var(--surface);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.ft-key-current {
+  background: var(--ft-color);
+}
+
+.ft-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.ft-tip {
+  position: absolute;
+  top: -30px;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(20, 20, 18, 0.88);
+  color: #fff;
+  font-size: var(--ui-font-size, 14px);
+  white-space: nowrap;
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@media (max-width: 720px) {
+  .ft-label {
+    flex-basis: 88px;
+  }
+  .ft-selected {
+    display: none;
+  }
+}

@@ -17,12 +17,10 @@ function requireGlobalRole(roles) {
   };
 }
 
-// Acceso a un tour puntual (req.params.tourId): pasa si el usuario es cliente o dev en
-// ESE tour, o si es Admin/Superadmin global (que operan sobre cualquier tour sin
-// necesitar una fila de TourPermission). Cliente y Dev ven y editan igual — no hay tier
-// de solo lectura por tour en este modelo (a diferencia del admin_tour/editor/viewer de
-// Fase 0); la única distinción entre ambos es el acceso a código personalizado, ver
-// requireDevAccess.
+// Acceso a un tour puntual (req.params.tourId): pasa si el usuario es cliente en ESE
+// tour, o si es Admin/Superadmin global (que operan sobre cualquier tour sin necesitar
+// una fila de TourPermission). No hay tier de solo lectura por tour en este modelo (a
+// diferencia del admin_tour/editor/viewer de Fase 0).
 function requireTourAccess() {
   return async (req, res, next) => {
     try {
@@ -47,30 +45,4 @@ function requireTourAccess() {
   };
 }
 
-// Como requireTourAccess, pero solo deja pasar a dev (o Admin/Superadmin global) — para
-// los endpoints de código personalizado (Tour.customCss/customJs).
-function requireDevAccess() {
-  return async (req, res, next) => {
-    try {
-      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-      if (user?.globalRole === "admin" || user?.globalRole === "super_admin") {
-        req.globalRole = user.globalRole;
-        return next();
-      }
-
-      const { tourId } = req.params;
-      const permission = await prisma.tourPermission.findUnique({
-        where: { tourId_userId: { tourId, userId: req.user.id } },
-      });
-      if (permission?.role !== "dev") {
-        return res.status(403).json({ error: "Requiere rol dev sobre este tour" });
-      }
-      req.tourRole = permission.role;
-      next();
-    } catch (err) {
-      next(err);
-    }
-  };
-}
-
-module.exports = { requireGlobalRole, requireTourAccess, requireDevAccess };
+module.exports = { requireGlobalRole, requireTourAccess };

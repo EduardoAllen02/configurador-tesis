@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { asyncHandler } = require("../utils/asyncHandler");
+const { removesLastSuperAdmin } = require("../services/accessRules");
 
 const selectSafe = { id: true, email: true, fullName: true, globalRole: true, createdAt: true };
 
@@ -8,8 +9,14 @@ function isGlobalOperator(user) {
 }
 
 const list = asyncHandler(async (req, res) => {
-  const users = await prisma.user.findMany({ select: selectSafe, orderBy: { createdAt: "asc" } });
-  res.json(users);
+  const users = await prisma.user.findMany({
+    select: { ...selectSafe, tourPermissions: { select: { id: true, tour: { select: { id: true, title: true } } } } },
+    orderBy: { createdAt: "asc" },
+  });
+  res.json(users.map(({ tourPermissions, ...user }) => ({
+    ...user,
+    tours: tourPermissions.map(({ id, tour }) => ({ ...tour, permissionId: id })),
+  })));
 });
 
 const getOne = asyncHandler(async (req, res) => {
@@ -46,6 +53,12 @@ const updateRole = asyncHandler(async (req, res) => {
   const { globalRole } = req.body;
   if (!["super_admin", "admin", "member"].includes(globalRole)) {
     return res.status(400).json({ error: "globalRole inválido" });
+  }
+  const target = await prisma.user.findUnique({ where: { id: req.params.id }, select: { globalRole: true } });
+  if (!target) return res.status(404).json({ error: "Usuario no encontrado" });
+  const superAdmins = await prisma.user.count({ where: { globalRole: "super_admin" } });
+  if (removesLastSuperAdmin(target.globalRole, globalRole, superAdmins)) {
+    return res.status(409).json({ error: "El sistema necesita al menos un superadministrador" });
   }
   const user = await prisma.user.update({
     where: { id: req.params.id },

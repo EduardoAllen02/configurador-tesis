@@ -11,6 +11,7 @@ const {
   bulkUploadPanoramas,
   getOne,
   update,
+  regenerateTiles,
   remove,
   reorder,
 } = require("../controllers/scenes.controller");
@@ -43,6 +44,7 @@ router.post(
 router.patch("/reorder", requireTourAccess(), reorder);
 router.get("/:sceneId", requireTourAccess(), getOne);
 router.patch("/:sceneId", requireTourAccess(), update);
+router.post("/:sceneId/tiles", requireTourAccess(), regenerateTiles);
 router.delete("/:sceneId", requireTourAccess(), remove);
 
 module.exports = router;

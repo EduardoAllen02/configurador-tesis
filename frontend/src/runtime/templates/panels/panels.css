@@ -1,0 +1,218 @@
+/* Paneles de detalle: hoja lateral, hoja inferior y la variante móvil de la tarjeta flotante.
+   Los estados finales son los de base; el movimiento solo con prefers-reduced-motion: no-preference. */
+
+.tour-rt-sheet {
+  position: absolute;
+  z-index: 100; /* sobre el HUD (los elementos del diseño usan z hasta ~10) */
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  overflow: hidden;
+  color: #fff;
+  background: rgba(17, 31, 57, 0.82);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 64px -16px rgba(6, 12, 24, 0.7);
+  cursor: default;
+  touch-action: pan-y;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.tour-rt-sheet--light {
+  color: #101a2b;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(16, 26, 43, 0.1);
+}
+
+/* Lateral: alto completo, pegada a la derecha. */
+.tour-rt-sheet--side {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(452px, 100%);
+  border-width: 0 0 0 1px;
+}
+/* Inferior: ancho completo, sube desde abajo. */
+.tour-rt-sheet--bottom,
+.tour-rt-sheet.is-mobile,
+.tour-rt-card.is-mobile {
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: none;
+  max-height: min(72%, 560px);
+  border-width: 1px 0 0 0;
+  border-radius: 18px 18px 0 0;
+}
+.tour-rt-card.is-mobile {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 22px;
+  border-left: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 -16px 48px -12px rgba(6, 12, 24, 0.6);
+}
+.tour-rt-sheet--bottom {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.tour-rt-sheet-head {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 22px 18px 28px;
+  flex: none;
+}
+.tour-rt-sheet-grab {
+  display: none;
+}
+.tour-rt-sheet--bottom .tour-rt-sheet-head,
+.tour-rt-sheet.is-mobile .tour-rt-sheet-head {
+  padding: 22px 16px 14px 22px;
+}
+.tour-rt-sheet--bottom .tour-rt-sheet-grab,
+.tour-rt-sheet.is-mobile .tour-rt-sheet-grab {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 38px;
+  height: 4px;
+  margin-left: -19px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.25;
+}
+.tour-rt-sheet-titles {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tour-rt-sheet-kicker {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  opacity: 0.5;
+}
+.tour-rt-sheet-title {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.tour-rt-sheet-close {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: rotate 0.35s cubic-bezier(0.34, 1.4, 0.5, 1), background 0.2s ease;
+}
+.tour-rt-sheet--light .tour-rt-sheet-close {
+  background: rgba(16, 26, 43, 0.06);
+  border-color: rgba(16, 26, 43, 0.14);
+}
+.tour-rt-sheet-close:hover {
+  rotate: 90deg;
+  background: rgba(255, 255, 255, 0.18);
+}
+.tour-rt-sheet-close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.tour-rt-sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.tour-rt-sheet--bottom .tour-rt-sheet-body,
+.tour-rt-sheet.is-mobile .tour-rt-sheet-body {
+  padding: 0 22px 24px;
+}
+.tour-rt-sheet-img {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.tour-rt-sheet-price {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--tour-accent, #4da3ff);
+}
+.tour-rt-sheet-desc {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  opacity: 0.8;
+  white-space: pre-line;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tour-rt-sheet--side.is-ready:not(.is-mobile) {
+    animation: tour-rt-sheet-side-in 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .tour-rt-sheet--bottom.is-ready,
+  .tour-rt-sheet.is-mobile.is-ready,
+  .tour-rt-card.is-mobile {
+    animation: tour-rt-sheet-up-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .tour-rt-sheet--side.is-closing:not(.is-mobile) {
+    animation: tour-rt-sheet-side-out 0.3s ease-in both;
+  }
+  .tour-rt-sheet--bottom.is-closing,
+  .tour-rt-sheet.is-mobile.is-closing {
+    animation: tour-rt-sheet-up-out 0.28s ease-in both;
+  }
+  @keyframes tour-rt-sheet-side-in {
+    from {
+      transform: translateX(101%);
+    }
+  }
+  @keyframes tour-rt-sheet-side-out {
+    to {
+      transform: translateX(101%);
+    }
+  }
+  @keyframes tour-rt-sheet-up-in {
+    from {
+      transform: translateY(101%);
+    }
+  }
+  @keyframes tour-rt-sheet-up-out {
+    to {
+      transform: translateY(101%);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-rt-sheet-close {
+    transition: none;
+  }
+}

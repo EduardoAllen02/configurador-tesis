@@ -4,10 +4,15 @@ import { useAuth } from "./auth/useAuth.js";
 import { peekLoggingOut, resetLoggingOutFlag } from "./auth/logoutIntent.js";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import ToursListPage from "./pages/ToursListPage.jsx";
 import TourEditorPage from "./pages/TourEditorPage.jsx";
 import TourViewerPage from "./pages/TourViewerPage.jsx";
+import TourDesignPage from "./pages/TourDesignPage.jsx";
+import TourPublishPage from "./pages/TourPublishPage.jsx";
 import RedeemInvitationPage from "./pages/RedeemInvitationPage.jsx";
+import UsersPage from "./pages/UsersPage.jsx";
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
@@ -33,6 +38,8 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/tours"
         element={
@@ -50,10 +57,34 @@ export default function App() {
         }
       />
       <Route
+        path="/tours/:tourId/design"
+        element={
+          <RequireAuth>
+            <TourDesignPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/tours/:tourId/publish"
+        element={
+          <RequireAuth>
+            <TourPublishPage />
+          </RequireAuth>
+        }
+      />
+      <Route
         path="/tours/:tourId/view"
         element={
           <RequireAuth>
             <TourViewerPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <RequireAuth>
+            <UsersPage />
           </RequireAuth>
         }
       />

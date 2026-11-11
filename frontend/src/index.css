@@ -1,5 +1,10 @@
 /* ── Tokens ──────────────────────────────────────────────────────────── */
 :root {
+  --ui-font-size: 14px;
+  --ui-font-caption: 11px;
+  --ui-font-secondary: 12px;
+  --ui-line-height: 22px;
+  --ui-heading-line-height: 20px;
   --bg: #f7f6f3;
   --surface: #ffffff;
   --surface-sunken: #f1efea;
@@ -8,7 +13,7 @@
 
   --text: #1a1a18;
   --text-soft: #6b6a66;
-  --text-faint: #9c9a94;
+  --text-faint: #77746d;
 
   --accent: #17171533;
   --accent-solid: #171715;
@@ -39,7 +44,7 @@
   --space-10: 40px;
   --space-12: 48px;
 
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ── Reset ───────────────────────────────────────────────────────────── */
@@ -147,7 +152,7 @@ p {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: 13.5px;
+  font-size: var(--ui-font-size, 14px);
   color: var(--text-soft);
 }
 
@@ -160,7 +165,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: var(--ui-font-size, 14px);
   font-weight: 600;
   color: var(--text-soft);
   flex-shrink: 0;
@@ -170,6 +175,33 @@ p {
   flex: 1;
   width: 100%;
 }
+.app-shell--viewer { height: 100dvh; min-height: 0; overflow: hidden; }
+.app-shell--viewer .app-main { min-height: 0; display: flex; }
+.tour-viewer-page { flex: 1; min-width: 0; min-height: 0; position: relative; background: #111; }
+
+/* Scroll discreto con rueda y arrastre, sin reservar una franja ancha. */
+* { scrollbar-width: thin; scrollbar-color: #a3a3aa transparent; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #a3a3aa; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #71717a; }
+@supports selector(::-webkit-scrollbar) { * { scrollbar-width: auto; scrollbar-color: auto; } }
+
+/* El área de trabajo ocupa el ancho disponible; navegación y herramientas en los bordes. */
+.content-editor-page { width: 100%; padding: 0 12px 24px; font-size: var(--ui-font-size); line-height: var(--ui-line-height); }
+.publish-editor-page { font-size: var(--ui-font-size); line-height: var(--ui-line-height); }
+.content-editor-page > .page-header { padding: 12px 0; margin: 0; align-items: center; }
+.content-editor-page .page-title { font-size: 20px; }
+.content-editor-page .page-subtitle { margin: 0; font-size: 14px; }
+.content-editor-page .editor-layout { grid-template-columns: 240px minmax(0, 1fr); gap: 12px; height: max(440px, calc(100dvh - 200px)); }
+.content-editor-page .content-studio { height: 100%; min-height: 0; border-radius: 0; }
+.content-editor-page .content-studio .studio-body { min-height: 0; }
+.content-editor-page .editor-viewer { border-radius: 0; }
+.appearance-link-card { justify-content:space-between; gap:16px; padding:16px 20px; flex-wrap:wrap; }
+.appearance-link-card p { flex:1 1 420px; line-height:1.5; }
+.appearance-link-card .btn { flex:none; }
+.content-editor-page > .section { margin-bottom: 24px; }
+.content-editor-page .content-studio .sp-drawer { width: 280px; }
 
 .page {
   max-width: 1040px;
@@ -218,7 +250,7 @@ p {
 }
 
 .section-hint {
-  font-size: 13px;
+  font-size: var(--ui-font-size, 14px);
   color: var(--text-faint);
 }
 
@@ -290,7 +322,7 @@ p {
 
 .btn-sm {
   padding: 6px 11px;
-  font-size: 13px;
+  font-size: var(--ui-font-size, 14px);
 }
 
 .btn-icon {
@@ -319,7 +351,7 @@ p {
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: var(--ui-font-size, 14px);
   font-weight: 500;
   color: var(--text-soft);
 }
@@ -374,14 +406,17 @@ p {
 }
 
 .error-text {
-  font-size: 13px;
+  font-size: var(--ui-font-size, 14px);
   color: var(--danger);
 }
 
 .helper-text {
-  font-size: 12.5px;
+  font-size: var(--ui-font-size, 14px);
   color: var(--text-faint);
+  line-height: 1.5;
 }
+
+.text-soft, .text-faint { line-height:1.5; }
 
 /* ── File dropzone ───────────────────────────────────────────────────── */
 .dropzone {
@@ -428,14 +463,14 @@ p {
 }
 
 .dropzone-desc {
-  font-size: 12.5px;
+  font-size: var(--ui-font-size, 14px);
   color: var(--text-soft);
   max-width: 30ch;
 }
 
 .dropzone-file {
   margin-top: var(--space-2);
-  font-size: 12px;
+  font-size: var(--ui-font-size, 14px);
   color: var(--text-faint);
   padding: 3px 10px;
   border-radius: var(--radius-pill);
@@ -459,7 +494,7 @@ p {
   gap: 4px;
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  font-size: 11.5px;
+  font-size: var(--ui-font-size, 14px);
   font-weight: 600;
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -521,7 +556,7 @@ p {
 }
 
 .empty-state-body {
-  font-size: 13.5px;
+  font-size: var(--ui-font-size, 14px);
   max-width: 42ch;
   line-height: 1.5;
 }
@@ -617,7 +652,7 @@ p {
 }
 
 .scene-tile-label {
-  font-size: 13px;
+  font-size: var(--ui-font-size, 14px);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -625,7 +660,7 @@ p {
 }
 
 .scene-tile-meta {
-  font-size: 11.5px;
+  font-size: var(--ui-font-size, 14px);
   color: var(--text-faint);
 }
 
@@ -680,7 +715,7 @@ p {
   border: 1.5px dashed var(--border-strong);
   border-radius: var(--radius-md);
   color: var(--text-soft);
-  font-size: 13px;
+  font-size: var(--ui-font-size, 14px);
   cursor: pointer;
   background: transparent;
 }
@@ -718,7 +753,7 @@ p {
   justify-content: center;
   gap: var(--space-2);
   color: rgba(255, 255, 255, 0.75);
-  font-size: 13px;
+  font-size: var(--ui-font-size, 14px);
   background: #111;
 }
 
@@ -730,10 +765,14 @@ p {
   background: rgba(15, 15, 15, 0.65);
   backdrop-filter: blur(6px);
   color: rgba(255, 255, 255, 0.85);
-  font-size: 12px;
+  font-size: var(--ui-font-size, 14px);
   padding: 6px 14px;
   border-radius: var(--radius-pill);
-  white-space: nowrap;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  white-space: normal;
+  text-align: center;
+  line-height: 1.45;
   pointer-events: none;
 }
 
@@ -750,39 +789,6 @@ p {
   to {
     transform: rotate(360deg);
   }
-}
-
-/* ── Marcadores sobre la esfera (público y editor) ──────────────────── */
-.hs-marker-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  /* info (default): marca del tour. nav/price se quedan con su color semántico fijo,
-     definido después — no queremos que "ir a otra escena" o "precio" pierdan su
-     significado visual solo porque el tour tiene otro acento de marca. */
-  background: var(--tour-accent, rgba(23, 23, 21, 0.82));
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-  transition: transform 0.12s ease;
-}
-
-.hs-marker-btn:hover {
-  transform: scale(1.12);
-}
-
-.hs-marker-nav {
-  background: rgba(47, 111, 237, 0.88);
-}
-
-.hs-marker-price {
-  background: rgba(165, 104, 14, 0.88);
 }
 
 /* ── Popover de hotspot (crear/editar) ───────────────────────────────── */
@@ -805,8 +811,10 @@ p {
 .hotspot-popover-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
+  justify-content: flex-start;
 }
+.hotspot-type-label { font-size: 14px; font-weight: 600; }
 
 .hotspot-type-group {
   display: flex;
@@ -817,8 +825,8 @@ p {
 }
 
 .hotspot-type-btn {
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
   border-radius: 6px;
   border: none;
   background: transparent;
@@ -850,7 +858,7 @@ p {
   padding: var(--space-3) var(--space-4);
   background: var(--surface);
   border: none;
-  font-size: 13.5px;
+  font-size: var(--ui-font-size, 14px);
   font-weight: 500;
   color: var(--text-soft);
   cursor: pointer;

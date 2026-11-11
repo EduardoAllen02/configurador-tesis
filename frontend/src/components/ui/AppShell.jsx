@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth.js";
 import { markLoggingOut } from "../../auth/logoutIntent.js";
-import { LogoMark, LogOutIcon, ArrowLeftIcon } from "./Icon.jsx";
+import { LogoMark, LogOutIcon, ArrowLeftIcon, UsersIcon } from "./Icon.jsx";
 
 // Barra superior fija + contenedor de página, compartida por toda la app
 // autenticada — le da continuidad visual a algo que antes eran páginas sueltas
 // sin ningún elemento en común.
-export default function AppShell({ crumbs = [], children, fullBleed = false }) {
+export default function AppShell({ crumbs = [], children, fullBleed = false, header, headerAction, className = "" }) {
   const { user, logout } = useAuth();
   const initial = user?.fullName?.[0]?.toUpperCase() ?? "?";
 
@@ -20,8 +20,8 @@ export default function AppShell({ crumbs = [], children, fullBleed = false }) {
   }
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
+    <div className={`app-shell ${className}`}>
+      {header || <header className="topbar">
         <div className="row" style={{ minWidth: 0 }}>
           <Link to="/tours" className="topbar-brand">
             <LogoMark width={22} height={22} strokeWidth={1.6} />
@@ -48,12 +48,18 @@ export default function AppShell({ crumbs = [], children, fullBleed = false }) {
           )}
         </div>
         <div className="topbar-right">
-          {crumbs.length > 0 && (
+          {user?.globalRole === "super_admin" && (
+            <Link to="/users" className="btn btn-ghost btn-sm">
+              <UsersIcon width={15} height={15} />
+              Usuarios
+            </Link>
+          )}
+          {headerAction ?? (crumbs.length > 0 && (
             <Link to="/tours" className="btn btn-ghost btn-sm">
               <ArrowLeftIcon width={15} height={15} />
               Tours
             </Link>
-          )}
+          ))}
           <div className="topbar-user">
             <div className="avatar">{initial}</div>
             {user?.fullName}
@@ -62,7 +68,7 @@ export default function AppShell({ crumbs = [], children, fullBleed = false }) {
             <LogOutIcon width={17} height={17} />
           </button>
         </div>
-      </header>
+      </header>}
       <main className="app-main">{fullBleed ? children : <div className="page">{children}</div>}</main>
     </div>
   );

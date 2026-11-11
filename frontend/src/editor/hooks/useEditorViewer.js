@@ -1,152 +1,98 @@
 import { useEffect, useRef, useState } from "react";
-import { createViewerScene } from "../../viewer/core/sceneSetup.js";
-import { attachCameraControls } from "../../viewer/core/cameraControls.js";
-import { createTextureCache } from "../../viewer/core/textureCache.js";
-import { lonLatToVec3 } from "../../viewer/core/lonLatToVec3.js";
-import { createHotspotRaycaster } from "../../viewer/core/hotspotEditingRaycaster.js";
-import { buildEditableHotspotMarkerEl } from "../core/editableHotspotMarkerEl.js";
-import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { createTourRuntime } from "../../runtime/index.js";
 
-// Hook orquestador del visor de edición: monta una sola panorámica estática (a diferencia
-// de useTourViewer, no navega una secuencia de frames) y agrega lo que hace falta para
-// editar hotspots directamente sobre la esfera: clic derecho para crear uno nuevo (vía
-// raycasting) y arrastre para reposicionar uno existente.
+// Monta el motor del tour en modo `edit` sobre el contenedor y traduce sus eventos a los
+// callbacks del editor: clic derecho para crear (contextmenu), arrastre para reposicionar
+// (hotspotmove) y clic en un marcador (hotspotclick: el editor decide si abre el popover o
+// navega). El motor es el mismo del visor; aquí solo vive lo propio de editar.
 //
-// Los marcadores se reconstruyen en un efecto SEPARADO del que monta la escena (dependiente
-// solo de `hotspots`), para poder crear/mover/borrar un hotspot sin reiniciar la cámara ni
-// recargar la textura — si compartiera el mismo efecto que useTourViewer, cada hotspot nuevo
-// remontaría todo el visor y la cámara volvería a su ángulo inicial.
+// El motor se crea UNA vez (mientras haya escena). Cambiar de escena es `goToScene` y crear,
+// mover o borrar un hotspot es `setDocument`: ninguno recrea el contexto WebGL ni mueve la
+// cámara (solo al cambiar de escena se orienta a su yaw/pitch inicial, como antes).
+//
+// Video: los cuadros de un lote se recorren con `goToFrame` (el motor emite `framechange` y
+// `onFrameChange(sceneId)` deja que la página siga el cuadro actual). `hotspotmove` llega con
+// el cuadro donde se soltó ({ lon, lat, sceneId, frameIndex }).
 export function useEditorViewer({
   containerRef,
-  webpPath,
-  hotspots,
-  initialYaw = 0,
-  initialPitch = 0,
+  doc,
+  selectedHotspotId,
+  sceneId,
   onRequestCreateHotspot,
   onHotspotMoved,
+  onHotspotStyleMoved,
+  onHotspotResized,
+  onEditHotspotPiece,
   onOpenHotspot,
   onNavigateHotspot,
+  onFrameChange,
 }) {
-  const sceneApiRef = useRef(null);
-  const raycasterRef = useRef(null);
-  const markersRef = useRef([]);
-  const controlsRef = useRef(null);
+  const runtimeRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
-  // Los callbacks viven en un ref para que la escena (efecto de abajo) no se reconstruya
-  // solo porque TourEditorPage pasó una función nueva en el render.
+  // Los callbacks y el estado vigente viven en refs para no reconstruir el motor por un render.
   const callbacksRef = useRef({});
-  callbacksRef.current = { onRequestCreateHotspot, onHotspotMoved, onOpenHotspot, onNavigateHotspot };
+  callbacksRef.current = { onRequestCreateHotspot, onHotspotMoved, onHotspotStyleMoved, onHotspotResized, onEditHotspotPiece, onOpenHotspot, onNavigateHotspot, onFrameChange };
+  const latestRef = useRef({});
+  latestRef.current = { doc, sceneId };
+
+  const hasScene = Boolean(sceneId);
 
   useEffect(() => {
-    if (!containerRef.current || !webpPath) return undefined;
-
-    const container = containerRef.current;
-    const sceneApi = createViewerScene(container);
-    sceneApiRef.current = sceneApi;
-    raycasterRef.current = createHotspotRaycaster({ camera: sceneApi.camera, sphere: sceneApi.sphere });
-
-    const textureCache = createTextureCache({ frames: [webpPath] });
-    let animationId;
-    let disposed = false;
+    if (!containerRef.current || !hasScene) return undefined;
+    const { doc: initialDoc, sceneId: initialSceneId } = latestRef.current;
+    const runtime = createTourRuntime(containerRef.current, initialDoc, { mode: "edit", initialSceneId });
+    runtimeRef.current = runtime;
     setReady(false);
     setLoadError(false);
 
-    textureCache
-      .loadTexture(0)
-      .then((texture) => {
-        if (disposed) return;
-        sceneApi.sphere.material.map = texture;
-        sceneApi.sphere.material.color.set(0xffffff);
-        sceneApi.sphere.material.needsUpdate = true;
-        setReady(true);
-      })
-      .catch(() => {
-        if (!disposed) setLoadError(true);
-      });
-
-    const controls = attachCameraControls({
-      containerEl: container,
-      camera: sceneApi.camera,
-      getNadirLat: () => 85,
+    runtime.on("sceneready", (e) => {
+      if (e.sceneId === latestRef.current.sceneId) setReady(true);
     });
-    controlsRef.current = controls;
-    controls.animateCameraTo(initialYaw, initialPitch, 0);
-
-    function handleContextMenu(e) {
-      e.preventDefault();
-      const rect = container.getBoundingClientRect();
-      const lonLat = raycasterRef.current?.pointToLonLat(e.clientX, e.clientY, rect);
-      if (!lonLat) return;
-      callbacksRef.current.onRequestCreateHotspot?.({ ...lonLat, clientX: e.clientX, clientY: e.clientY });
-    }
-    container.addEventListener("contextmenu", handleContextMenu);
-
-    function animate() {
-      sceneApi.render();
-      animationId = requestAnimationFrame(animate);
-    }
-    animate();
-
-    const resizeObserver = new ResizeObserver(() => {
-      sceneApi.setSize(container.clientWidth, container.clientHeight);
+    runtime.on("loaderror", (e) => {
+      if (e.sceneId === latestRef.current.sceneId) setLoadError(true);
     });
-    resizeObserver.observe(container);
+    runtime.on("contextmenu", (e) => callbacksRef.current.onRequestCreateHotspot?.(e));
+    runtime.on("hotspotmove", ({ id, lon, lat, sceneId: movedSceneId, frameIndex }) =>
+      callbacksRef.current.onHotspotMoved?.(id, { lon, lat, sceneId: movedSceneId, frameIndex })
+    );
+    runtime.on("framechange", (e) => callbacksRef.current.onFrameChange?.(e.sceneId));
+    runtime.on("hotspotstylechange", ({ id, style }) => callbacksRef.current.onHotspotStyleMoved?.(id, style));
+    runtime.on("hotspoteditpiece", ({ hotspot, piece, rect }) => callbacksRef.current.onEditHotspotPiece?.(hotspot, piece, rect));
+    runtime.on("hotspotresize", ({ id, patch }) => callbacksRef.current.onHotspotResized?.(id, patch));
+    runtime.on("hotspotclick", ({ hotspot, rect }) => {
+      callbacksRef.current.onOpenHotspot?.(hotspot, rect);
+    });
 
     return () => {
-      disposed = true;
+      runtime.destroy();
+      runtimeRef.current = null;
       setReady(false);
-      cancelAnimationFrame(animationId);
-      resizeObserver.disconnect();
-      container.removeEventListener("contextmenu", handleContextMenu);
-      controls.dispose();
-      textureCache.dispose();
-      markersRef.current.forEach((m) => sceneApi.scene.remove(m));
-      markersRef.current = [];
-      sceneApi.dispose();
-      sceneApiRef.current = null;
-      raycasterRef.current = null;
-      controlsRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerRef, webpPath]);
+  }, [containerRef, hasScene]);
 
   useEffect(() => {
-    const sceneApi = sceneApiRef.current;
-    if (!sceneApi) return undefined;
+    runtimeRef.current?.setDocument(doc);
+  }, [doc]);
+  useEffect(() => { runtimeRef.current?.selectHotspot(selectedHotspotId); }, [doc, selectedHotspotId]);
 
-    markersRef.current.forEach((m) => sceneApi.scene.remove(m));
-    markersRef.current = [];
-
-    (hotspots || []).forEach((hotspot) => {
-      let obj;
-      const el = buildEditableHotspotMarkerEl(hotspot, {
-        onOpen: (hs, btnEl) => {
-          if (hs.type === "nav") callbacksRef.current.onNavigateHotspot?.(hs.targetSceneId);
-          else callbacksRef.current.onOpenHotspot?.(hs, btnEl.getBoundingClientRect());
-        },
-        onDragMove: (clientX, clientY) => {
-          const rect = containerRef.current?.getBoundingClientRect();
-          const lonLat = rect && raycasterRef.current?.pointToLonLat(clientX, clientY, rect);
-          if (lonLat) obj.position.copy(lonLatToVec3(lonLat.lon, lonLat.lat));
-        },
-        onDragEnd: (clientX, clientY) => {
-          const rect = containerRef.current?.getBoundingClientRect();
-          const lonLat = rect && raycasterRef.current?.pointToLonLat(clientX, clientY, rect);
-          if (lonLat) callbacksRef.current.onHotspotMoved?.(hotspot.id, lonLat);
-        },
-      });
-      obj = new CSS2DObject(el);
-      obj.position.copy(lonLatToVec3(hotspot.lon, hotspot.lat));
-      sceneApi.scene.add(obj);
-      markersRef.current.push(obj);
-    });
-  }, [hotspots, ready, containerRef]);
+  useEffect(() => {
+    if (!sceneId) return;
+    const runtime = runtimeRef.current;
+    if (!runtime || runtime.getState().sceneId === sceneId) return;
+    setReady(false);
+    setLoadError(false);
+    runtime.goToScene(sceneId);
+  }, [sceneId]);
 
   function focusHotspot(lon, lat) {
-    controlsRef.current?.animateCameraTo(lon, lat, 600);
+    runtimeRef.current?.focus(lon, lat, 600);
   }
 
-  return { ready, loadError, focusHotspot };
+  function goToFrame(index) {
+    runtimeRef.current?.goToFrame(index);
+  }
+
+  return { ready, loadError, focusHotspot, goToFrame, setHotspotTesting: value => runtimeRef.current?.setHotspotTesting(value), previewHotspotDetail: (id, show) => runtimeRef.current?.previewHotspotDetail(id, show) };
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api/client";
 
-// `enabled` evita el fetch para quien no puede gestionar invitaciones (Cliente/Dev) — el
+// `enabled` evita el fetch para quien no puede gestionar invitaciones (Cliente) — el
 // endpoint es admin-only desde Fase 2.0, así que llamarlo para ellos solo generaría un
 // 403 innecesario en cada carga del editor.
 export function useInvitations(tourId, enabled = true) {

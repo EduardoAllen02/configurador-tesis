@@ -1,0 +1,2 @@
+.tour-rt-loader[hidden] { display: none; }
+.tour-rt-loader.is-determinate .tour-rt-loader-fill { animation: none; transform: none; transition: width 120ms linear; }

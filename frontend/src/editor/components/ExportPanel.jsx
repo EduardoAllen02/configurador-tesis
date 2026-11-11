@@ -5,7 +5,7 @@ export default function ExportPanel({ exports, error, exporting, onExport }) {
   return (
     <div className="card card-pad stack">
       <div className="spread">
-        <p className="text-soft" style={{ fontSize: 13.5, maxWidth: "48ch" }}>
+        <p className="text-soft" style={{ fontSize: 14, maxWidth: "48ch" }}>
           Genera un sitio autocontenido (HTML + imágenes) que puedes publicar en cualquier
           hosting estático, sin depender de este panel.
         </p>
@@ -22,7 +22,7 @@ export default function ExportPanel({ exports, error, exporting, onExport }) {
           {exports.map((exp) => (
             <div key={exp.id} className="card row" style={{ padding: "10px 14px" }}>
               <span className="badge">v{exp.version}</span>
-              <span className="text-soft" style={{ flex: 1, fontSize: 13 }}>
+              <span className="text-soft" style={{ flex: 1, fontSize: 14 }}>
                 {new Date(exp.createdAt).toLocaleString("es-MX")}
               </span>
               <a

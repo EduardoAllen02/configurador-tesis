@@ -1,0 +1,11 @@
+.context-menu-settings { max-width: 720px; gap: 12px; font-size: 14px; }
+.context-menu-settings h3 { font-size: 15px; font-weight: 600; }
+.context-menu-settings p { margin: 4px 0 0; }
+.context-menu-settings .context-menu-check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.context-menu-options, .context-menu-credit-settings { gap: 10px; }
+.context-menu-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.context-menu-option { border: 1px solid var(--border, #dedee5); border-radius: 8px; }
+.context-menu-option summary { padding: 10px 12px; cursor: pointer; overflow-wrap: anywhere; }
+.context-menu-option > .stack { gap: 10px; padding: 0 12px 12px; }
+.context-menu-option-actions { flex-wrap: wrap; gap: 6px; }
+.context-menu-credit-settings { border-top: 1px solid var(--border, #dedee5); padding-top: 14px; }

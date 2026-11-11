@@ -1,0 +1,32 @@
+.editor-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-sunken);
+}
+
+.editor-tab {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.editor-tab:hover {
+  color: var(--text);
+}
+
+.editor-tab.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.editor-tabs--compact .editor-tab {
+  padding: 4px 12px;
+  font-size: var(--ui-font-size, 14px);
+}

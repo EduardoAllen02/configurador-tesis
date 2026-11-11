@@ -1,0 +1,138 @@
+.nadir-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nadir-lead {
+  margin: 0;
+  font-size: var(--ui-font-size, 14px);
+  max-width: 560px;
+}
+
+.nadir-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.nadir-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.nadir-mode:hover {
+  border-color: var(--text-faint);
+}
+
+.nadir-mode-active {
+  border-color: var(--accent-solid);
+  box-shadow: 0 0 0 1px var(--accent-solid);
+}
+
+.nadir-mode-title {
+  font-size: var(--ui-font-size, 14px);
+  font-weight: 600;
+}
+
+.nadir-mode-hint {
+  font-size: var(--ui-font-size, 14px);
+  color: var(--text-soft);
+}
+
+.nadir-field {
+  max-width: 360px;
+}
+
+.nadir-field input[type="range"] {
+  width: 100%;
+}
+
+.nadir-help {
+  font-size: var(--ui-font-size, 14px);
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+
+.nadir-cover {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.nadir-kind {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-pill);
+}
+
+.nadir-kind-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font-size: var(--ui-font-size, 14px);
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.nadir-kind-btn-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.nadir-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.nadir-color {
+  width: 40px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.nadir-code {
+  font-size: var(--ui-font-size, 14px);
+  font-variant-numeric: tabular-nums;
+}
+
+.nadir-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: var(--ui-font-size, 14px);
+}
+
+.nadir-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 720px) {
+  .nadir-modes {
+    grid-template-columns: 1fr;
+  }
+}

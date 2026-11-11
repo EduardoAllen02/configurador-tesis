@@ -1,0 +1,46 @@
+.tour-rt-root .tour-context-menu {
+  position: absolute;
+  z-index: 10000;
+  width: max-content;
+  min-width: min(220px, calc(100% - 12px));
+  max-width: min(320px, calc(100% - 12px));
+  max-height: calc(100% - 12px);
+  overflow: auto;
+  padding: 5px;
+  border: 1px solid #d8d8dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #202023;
+  box-shadow: 0 6px 24px #0003;
+  font: 13px/1.4 "TourInter", system-ui, sans-serif;
+  text-align: left;
+  touch-action: pan-y;
+}
+.tour-rt-root .tour-context-menu-item,
+.tour-rt-root .tour-context-menu-credit {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.tour-rt-root .tour-context-menu-item,
+.tour-rt-root a.tour-context-menu-credit { cursor: pointer; }
+.tour-rt-root .tour-context-menu-item:hover,
+.tour-rt-root .tour-context-menu-item:focus-visible,
+.tour-rt-root a.tour-context-menu-credit:hover,
+.tour-rt-root a.tour-context-menu-credit:focus-visible { background: #f0edf7; outline: 2px solid transparent; }
+.tour-rt-root .tour-context-menu-credit--divider { border-top: 1px solid #e6e6e8; border-radius: 0; margin-top: 4px; padding-top: 10px; }
+.tour-rt-root .tour-context-menu:focus { outline: none; }
+.tour-rt-root .tour-context-menu-notice {
+  position: absolute; z-index: 10001; bottom: 20px; left: 50%; transform: translateX(-50%);
+  width: max-content; max-width: calc(100% - 32px); padding: 10px 14px; border-radius: 8px;
+  background: #222; color: #fff; font: 13px/1.4 "TourInter", system-ui, sans-serif;
+  box-shadow: 0 4px 20px #0003; text-align: center;
+}
