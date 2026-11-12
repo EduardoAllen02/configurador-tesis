@@ -19,8 +19,8 @@ const TABS = [
   { id: "elementos", label: "Elementos", icon: "shapes", View: ElementsTab, title: "Elementos" },
   { id: "texto", label: "Texto", icon: "studio-text", iconSize: 20, View: TextTab, title: "Texto" },
   { id: "hotspots", label: "Hotspots", icon: "pin", View: HotspotsTab, title: "Hotspots" },
-  { id: "subidos", label: "Subidos", icon: "upload", View: UploadsTab, title: "Subidos" },
-  { id: "marca", label: "Marca", icon: "palette", View: BrandTab, title: "Marca" },
+  { id: "subidos", label: "Subidos", icon: "studio-uploads", iconSize: 20, View: UploadsTab, title: "Subidos" },
+  { id: "marca", label: "Marca", icon: "studio-brand", iconSize: 20, View: BrandTab, title: "Marca" },
 ];
 const SIDE_PANELS = { color: ColorPanel, position: PositionPanel, animate: AnimatePanel };
 

@@ -4,6 +4,7 @@ Rama `tesis/cierre-tercer-parcial`, revisión del 12 de noviembre de 2026.
 
 - Marcos de selección, estados activos y tiradores al pasar el mouse usan el azul de la rama de Andrea: `#2f49b8`, con tono suave `rgba(47,73,184,.14)`. También se ajustaron la selección múltiple, el grupo en edición, el selector de fuentes y los controles de las ventanas que conservaban acentos morados.
 - Plantillas y Texto usan dos dibujos SVG nuevos, específicos de la barra lateral, de **20×20 px** y trazo 1.75. Representan composiciones en hojas superpuestas y un bloque tipográfico. Los identificadores genéricos `layout` y `type` de otras herramientas permanecen disponibles.
+- Subidos y Marca también usan SVG propios de **20×20 px**, con el mismo trazo: carpeta con flecha de incorporación y tarjeta de identidad con un emblema y tres muestras. Los iconos genéricos `upload` y `palette` siguen disponibles para otras herramientas.
 - Las muestras de color morado de la paleta siguen siendo muestras de ese color; las guías inteligentes conservan su color independiente. No se alteraron diseños, panorámicas ni posiciones del tour.
 
 ## Revisión local
