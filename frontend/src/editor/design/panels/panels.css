@@ -304,7 +304,7 @@
 }
 
 .sp-btn--primary:hover:not(:disabled) {
-  background: #7a2ae8;
+  background: #243a93;
 }
 
 .sp-btn--wide {
@@ -567,7 +567,7 @@
 
 .sp-cell:hover {
   border-color: var(--studio-select);
-  box-shadow: 0 2px 10px rgba(139, 61, 255, 0.14);
+  box-shadow: 0 2px 10px rgba(47, 73, 184, 0.14);
 }
 
 .sp-cell:active {

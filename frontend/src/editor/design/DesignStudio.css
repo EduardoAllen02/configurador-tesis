@@ -66,8 +66,8 @@
 .studio, .content-studio, .hs-inplace-canvas {
   font-size: var(--ui-font-size, 14px);
   line-height: var(--ui-line-height, 22px);
-  --studio-select: #8b3dff; /* caja de selección, handles activos, anillo de swatch */
-  --studio-select-soft: rgba(139, 61, 255, 0.15); /* botón activo en barras */
+  --studio-select: #2f49b8; /* caja de selección, handles activos, anillo de swatch */
+  --studio-select-soft: rgba(47, 73, 184, 0.14); /* botón activo en barras */
   --studio-guide: #ff3d9a; /* guías inteligentes */
   --studio-canvas-bg: #eef0f4; /* fondo del área del lienzo */
   --studio-rail-w: 72px;

@@ -19,7 +19,7 @@
 .hs-detail-dimension { display:flex; align-items:center; gap:6px; }
 .hs-detail-dimension .input { min-width:0; width:100%; }
 .hs-detail-dimension > span { color:var(--text-soft); }
-.hs-detail-dimension input[type=range] { width:100%; min-width:0; accent-color:var(--studio-select,#8b3dff); cursor:ew-resize; }
+.hs-detail-dimension input[type=range] { width:100%; min-width:0; accent-color:var(--studio-select,#2f49b8); cursor:ew-resize; }
 .hs-detail-control-section { margin:0; padding:12px; border:1px solid var(--border); border-radius:8px; min-width:0; }
 .hs-detail-control-section legend { padding-inline:4px; font-weight:600; }
 @media(max-width:480px) { .hs-detail-size-grid { grid-template-columns:minmax(0,1fr); } }

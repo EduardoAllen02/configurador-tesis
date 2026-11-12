@@ -173,7 +173,7 @@
 .cv-marquee {
   position: absolute;
   border: 1px solid var(--studio-select);
-  background: rgba(139, 61, 255, 0.08);
+  background: rgba(47, 73, 184, 0.08);
   pointer-events: none;
 }
 
@@ -390,7 +390,7 @@
   background: var(--border);
 }
 
-.cv-group-bar { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 8px 16px; border-radius: 10px; max-width: 100%; box-sizing: border-box; background: #f5f0ff; color: #6137a8; font-size: var(--ui-font-size, 14px); }
+.cv-group-bar { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 8px 16px; border-radius: 10px; max-width: 100%; box-sizing: border-box; background: #edf1ff; color: #2f49b8; font-size: var(--ui-font-size, 14px); }
 .cv-group-bar button { border: 0; background: transparent; color: inherit; font: inherit; font-weight: 600; cursor: pointer; }
 .cv-group-boundary { position: absolute; border: 1px dashed var(--studio-select); box-shadow: 0 0 0 9999px #10152212; pointer-events: none; }
 

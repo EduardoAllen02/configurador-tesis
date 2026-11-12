@@ -15,9 +15,9 @@ import "./panels.css";
 // muestra la pestaña elegida; cuando el almacén tiene un panel lateral abierto (state.panel:
 // color, posición, animar), ese panel REEMPLAZA al cajón y se cierra con X o Escape.
 const TABS = [
-  { id: "plantillas", label: "Plantillas", icon: "layout", View: TemplatesTab, title: "Plantillas" },
+  { id: "plantillas", label: "Plantillas", icon: "studio-templates", iconSize: 20, View: TemplatesTab, title: "Plantillas" },
   { id: "elementos", label: "Elementos", icon: "shapes", View: ElementsTab, title: "Elementos" },
-  { id: "texto", label: "Texto", icon: "type", View: TextTab, title: "Texto" },
+  { id: "texto", label: "Texto", icon: "studio-text", iconSize: 20, View: TextTab, title: "Texto" },
   { id: "hotspots", label: "Hotspots", icon: "pin", View: HotspotsTab, title: "Hotspots" },
   { id: "subidos", label: "Subidos", icon: "upload", View: UploadsTab, title: "Subidos" },
   { id: "marca", label: "Marca", icon: "palette", View: BrandTab, title: "Marca" },
@@ -87,7 +87,7 @@ export default function LeftRail({ allowedTabs, detailMode = false }) {
           return (
             <button key={t.id} type="button" className={`sp-rail-item${active ? " is-active" : ""}`} aria-pressed={active} aria-label={t.label} onClick={() => choose(t.id)}>
               <span className="sp-rail-icon">
-                <Ico name={t.icon} size={22} />
+                <Ico name={t.icon} size={t.iconSize ?? 22} />
               </span>
               <span className="sp-rail-label">{t.label}</span>
             </button>
