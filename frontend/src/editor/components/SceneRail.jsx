@@ -7,6 +7,7 @@ import { ImageIcon, TrashIcon, DragHandleIcon, UploadIcon, XIcon, PencilIcon, Ch
 import { batchKeyOf } from "../../runtime/model/tourModel.js";
 import { sceneLabel } from "../utils/sceneLabel.js";
 import "./SceneRail.css";
+import { sceneThumbPath } from "./sceneThumb.js";
 
 // El rail muestra UNA tarjeta por video (aunque tenga 60 cuadros) y una por panorámica. Cada
 // elemento es { id, scene } (panorámica) o { id, batch: scenes[] } (video); la tarjeta de video
@@ -73,11 +74,36 @@ function SceneName({ scene, label, video = false, onRename }) {
   </div>;
 }
 
+// Miniatura ligera con carga diferida; si aún no puede generarse, cae a la WebP original y,
+// si tampoco existe, al ícono.
+function SceneThumb({ webpPath }) {
+  const [step, setStep] = useState(0);
+  const thumb = sceneThumbPath(webpPath);
+  useEffect(() => setStep(0), [webpPath]);
+  if (step > 1 || (step === 1 && thumb === webpPath)) return (
+    <span className="scene-tile-thumb scene-tile-thumb-fallback">
+      <ImageIcon width={16} height={16} />
+    </span>
+  );
+  return (
+    <img
+      className="scene-tile-thumb"
+      src={api.uploadUrl(step === 0 ? thumb : webpPath)}
+      alt=""
+      width={52}
+      height={40}
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      onError={() => setStep(value => value + 1)}
+    />
+  );
+}
+
 function SceneTile({ scene, index, isActive, onSelect, onRemove, onRename }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: scene.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   const isVideo = scene.origen === "video_frame";
-  const [thumbBroken, setThumbBroken] = useState(false);
 
   return (
     <div
@@ -89,18 +115,7 @@ function SceneTile({ scene, index, isActive, onSelect, onRemove, onRename }) {
       <span className="scene-tile-drag" {...attributes} {...listeners} onClick={(e) => e.stopPropagation()}>
         <DragHandleIcon width={14} height={14} />
       </span>
-      {thumbBroken ? (
-        <span className="scene-tile-thumb scene-tile-thumb-fallback">
-          <ImageIcon width={16} height={16} />
-        </span>
-      ) : (
-        <img
-          className="scene-tile-thumb"
-          src={api.uploadUrl(scene.webpPath)}
-          alt=""
-          onError={() => setThumbBroken(true)}
-        />
-      )}
+      <SceneThumb webpPath={scene.webpPath} />
       <div className="scene-tile-body">
         <SceneName scene={scene} label={sceneLabel(scene, index)} onRename={onRename} />
         <div className="scene-tile-meta">
@@ -127,7 +142,6 @@ function SceneTile({ scene, index, isActive, onSelect, onRemove, onRename }) {
 function VideoTile({ item, activeSceneId, onSelect, onRemove, onRename }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
-  const [thumbBroken, setThumbBroken] = useState(false);
   const first = item.batch[0];
   const activePos = item.batch.findIndex((s) => s.id === activeSceneId);
   const isActive = activePos >= 0;
@@ -143,18 +157,7 @@ function VideoTile({ item, activeSceneId, onSelect, onRemove, onRename }) {
       <span className="scene-tile-drag" {...attributes} {...listeners} onClick={(e) => e.stopPropagation()}>
         <DragHandleIcon width={14} height={14} />
       </span>
-      {thumbBroken ? (
-        <span className="scene-tile-thumb scene-tile-thumb-fallback">
-          <ImageIcon width={16} height={16} />
-        </span>
-      ) : (
-        <img
-          className="scene-tile-thumb"
-          src={api.uploadUrl(first.webpPath)}
-          alt=""
-          onError={() => setThumbBroken(true)}
-        />
-      )}
+      <SceneThumb webpPath={first.webpPath} />
       <div className="scene-tile-body">
         <SceneName scene={first} label={first.name || "Video 360°"} video onRename={onRename} />
         <div className="scene-tile-meta">{isActive ? `Cuadro ${activePos + 1} de ${count}` : `Video · ${count} ${count === 1 ? "cuadro" : "cuadros"}`}</div>
